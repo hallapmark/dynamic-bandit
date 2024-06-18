@@ -1,29 +1,31 @@
 from numpy import random
+from typing import Optional, NamedTuple
 
+
+class ExperimentData:
+    k: int = 0
+    n: int = 0
 
 class Agent:
     def __init__(self):
-        self.expectation = random.uniform(0, 1)
-        self.k, self.n = 0, 0
-        self.did_experiment_this_round = False
+        self.expectation_B = random.uniform(0, 1)
+        self.action_A_data = ExperimentData()
+        self.action_B_data = ExperimentData()
     
     def __str__(self):
-        return f"expectation = {round(self.expectation, 2)}, k = {self.k}, n = {self.n}"
-
-    def experiment(self, n, epsilon):
-        if self.expectation > .5:
-            self.k += random.binomial(n, .5 + epsilon)
-            self.n += n
-            self.did_experiment_this_round = True
-        else:
-            # exactly .5 or less: no longer experiments
-            self.did_experiment_this_round = False
-            # self.k, self.n = 0, 0
-
+        return f"expectation = {round(self.expectation_B, 2)}, k = {self.action_B_data.k}, n = {self.action_B_data.n}"
     
-    def expectation_update(self, k, n, epsilon):
+    def experiment(self, n, epsilon):
+        if self.expectation_B > .5:
+            self.action_B_data.k += random.binomial(n, .5 + epsilon)
+            self.action_B_data.n += n
+        else:
+            self.action_A_data.k += random.binomial(n, .5)
+            self.action_A_data.n += n
+
+    def expectation_B_update(self, k, n):
         # self.credence = 1 / (1 + (1 - self.credence) * (((0.5 - epsilon) / (0.5 + epsilon)) ** (2 * k - n)) / self.credence)
-        self.expectation = (k + 1) / (n + 2)
+        self.expectation_B = (k + 1) / (n + 2)
     
     # def jeffrey_update(self, neighbor, epsilon, m):
     #     n = neighbor.n
