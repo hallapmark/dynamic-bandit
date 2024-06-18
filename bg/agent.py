@@ -3,27 +3,27 @@ from numpy import random
 
 class Agent:
     def __init__(self):
-        self.credence = random.uniform(0, 1)
+        self.expectation = random.uniform(0, 1)
         self.k, self.n = 0, 0
         self.did_experiment_this_round = False
     
     def __str__(self):
-        return f"credence = {round(self.credence, 2)}, k = {self.k}, n = {self.n}"
+        return f"expectation = {round(self.expectation, 2)}, k = {self.k}, n = {self.n}"
 
     def experiment(self, n, epsilon):
-        if self.credence > .5:
+        if self.expectation > .5:
             self.k += random.binomial(n, .5 + epsilon)
             self.n += n
             self.did_experiment_this_round = True
         else:
-            self.did_experiment_this_round = False
             # exactly .5 or less: no longer experiments
+            self.did_experiment_this_round = False
             # self.k, self.n = 0, 0
 
     
-    def bayes_update(self, k, n, epsilon):
+    def expectation_update(self, k, n, epsilon):
         # self.credence = 1 / (1 + (1 - self.credence) * (((0.5 - epsilon) / (0.5 + epsilon)) ** (2 * k - n)) / self.credence)
-        self.credence = (k + 1)/(n + 2)
+        self.expectation = (k + 1) / (n + 2)
     
     # def jeffrey_update(self, neighbor, epsilon, m):
     #     n = neighbor.n

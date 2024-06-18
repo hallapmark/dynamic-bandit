@@ -29,28 +29,28 @@ class Graph:
             self.run_experiments(n, epsilon)
             if m:
                 # self.jeffrey_update_agents(epsilon, m)
-                """"""
+                raise NotImplementedError("Jeffrey/distrust updating not implemented.")
             else:
-                self.bayes_update_agents(epsilon)
+                self.expectation_update_agents(epsilon)
         
         if m:
             self.conclusion = self.polarized(m)
         else:
-            credences = np.array([a.credence for a in self.agents])
+            credences = np.array([a.expectation for a in self.agents])
             self.conclusion = all(credences > .99)
 
     def run_experiments(self, n, epsilon):
         for a in self.agents:
             a.experiment(n, epsilon)
 
-    def bayes_update_agents(self, epsilon):
+    def expectation_update_agents(self, epsilon):
         for a in self.agents:
             total_k, total_n = 0, 0
             for neighbor in self.graph[a]:
                 total_k += neighbor.k
                 total_n += neighbor.n
             if total_n > 0:
-                a.bayes_update(total_k, total_n, epsilon)
+                a.expectation_update(total_k, total_n, epsilon)
 
     # def jeffrey_update_agents(self, epsilon, m):
     #     for a in self.agents:
@@ -61,17 +61,17 @@ class Graph:
     #                 a.jeffrey_update(neighbor, epsilon, m)
 
     def undecided(self):
-        credences = np.array([a.credence for a in self.agents])
+        credences = np.array([a.expectation for a in self.agents])
         #if all credences are .5 or less, then (or) is true. Then returns false. 
         # i.e. the network is not undecided, and the simulation stops 
         return not (all(credences <= .5) or all(credences > .99)) 
 
-    def polarized(self, m):
-        credences = np.array([a.credence for a in self.agents])
-        if all((credences < .5) | (credences > .99)) & any(credences < .5) & any(credences > .99):
-            min_believer = min(credences[credences > .99])
-            max_disbeliever = max(credences[credences < .5])
-            d = min_believer - max_disbeliever
-            return m * d >= 1
-        else:
-            return False
+    # def polarized(self, m):
+    #     credences = np.array([a.credence for a in self.agents])
+    #     if all((credences < .5) | (credences > .99)) & any(credences < .5) & any(credences > .99):
+    #         min_believer = min(credences[credences > .99])
+    #         max_disbeliever = max(credences[credences < .5])
+    #         d = min_believer - max_disbeliever
+    #         return m * d >= 1
+    #     else:
+    #         return False
