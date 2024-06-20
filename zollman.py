@@ -1,4 +1,4 @@
-from bg.sim import process
+from banditsim.sim import process
 import timeit
 from multiprocessing import freeze_support
 

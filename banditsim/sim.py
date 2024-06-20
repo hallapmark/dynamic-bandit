@@ -1,7 +1,7 @@
 import csv
 import os.path
 from multiprocessing import Pool
-from bg.graph import Graph
+from banditsim.graph import Graph
 
 def process(grid, path):
     for params in grid:

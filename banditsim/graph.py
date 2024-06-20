@@ -1,4 +1,4 @@
-from bg.agent import Agent
+from banditsim.agent import Agent
 import numpy as np
 from typing import Dict
 
