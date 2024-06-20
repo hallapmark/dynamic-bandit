@@ -2,22 +2,20 @@ from banditsim.agent import Agent
 import numpy as np
 from typing import Dict
 
+from banditsim.models import GraphShape, ResultType
+
 class Graph:
-    def __init__(self, a, shape, max_epochs):
+    def __init__(self, a, shape: GraphShape, max_epochs):
         np.random.seed()
         self.agents = [Agent() for i in range(a)]
         self.graph: dict[Agent, list[Agent]] = dict()
         self.epoch = 0
         self.max_epochs = max_epochs
 
-        if shape == "cycle":
+        if shape == GraphShape.CYCLE:
             for i in range(a):
                 self.graph[self.agents[i]] = [ self.agents[i - 1], self.agents[i], self.agents[(i + 1) % a] ]
-        elif shape == "wheel":
-            self.graph[self.agents[0]] = self.agents
-            for i in range(1, a):
-                self.graph[self.agents[i]] = [ self.agents[0], self.agents[i - 1], self.agents[i], self.agents[(i + 1) % a] ]
-        elif shape == "complete":
+        elif shape == GraphShape.COMPLETE:
             for i in range(a):
                 self.graph[self.agents[i]] = self.agents
     
@@ -46,11 +44,11 @@ class Graph:
                 self.av_utility = (tot_utility / len(self.agents)) / self.epoch # Av round utility per agent
                 expectations = np.array([a.expectation_B for a in self.agents])
                 if all(expectations <= .5):
-                    self.result = 'stuck_on_A'
+                    self.result = ResultType.FALSE_CONSENSUS
                 elif all(expectations > .5):
-                    self.result = 'all_taking_B'
+                    self.result = ResultType.TRUE_CONSENSUS
                 else:
-                    self.result = 'mixed'
+                    self.result = ResultType.INDETERMINATE
             else:
                 # TODO: Do we calculate util from networks that epistemically fail on round 1 (that never go to action B)?
                 # On average, over the long run, av util per agent per round converges to 0.5 for these networks ... 
