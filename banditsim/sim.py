@@ -5,14 +5,14 @@ from statistics import mean
 
 import numpy as np
 from banditsim.graph import Graph
-from banditsim.models import AnalyzedResults, ResultType, SimParams, SimResults
+from banditsim.models import AnalyzedResults, ResultType, SimResults
 
-def process(paramsgrid: list[SimParams], path):
-    for params in paramsgrid:
+def process(grid, path):
+    for params in grid:
         print(params)
-        graph, a, n, e, m, max_epochs = params.graph, params.a, params.n, params.e, params.m, params.max_epochs
+        n_simulations, graph, a, n, e, m, max_epochs = params
         pool = Pool()
-        results = pool.starmap(run_simulation, ((graph, a, n, e, m, max_epochs),) * params.n_simulations)
+        results = pool.starmap(run_simulation, ((graph, a, n, e, m, max_epochs),) * n_simulations)
         pool.close()
         pool.join()
         # for _ in range(n_simulations):
