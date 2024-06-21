@@ -12,6 +12,7 @@ class GraphShape(Enum):
     CYCLE = auto()
 
 class SimResults(NamedTuple):
+    ## Results for a given sim
     graph_shape: GraphShape
     agents: int
     epochs: int
@@ -20,3 +21,16 @@ class SimResults(NamedTuple):
     trials: int
     epsilon: float
     mistrust: Optional[float]
+
+class AnalyzedResults(NamedTuple):
+    ## Analyzed results – averages over e.g. 5000 runs of sims
+    graph_shape: GraphShape
+    agents: int
+    av_utility: float
+    trials: int
+    epsilon: float
+    mistrust: Optional[float]
+
+    prop_true_cons: float
+    prop_false_cons: float
+    prop_indeterminate: float
