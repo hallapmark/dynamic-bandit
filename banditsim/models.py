@@ -11,6 +11,15 @@ class GraphShape(Enum):
     COMPLETE = auto()
     CYCLE = auto()
 
+class SimParams(NamedTuple):
+    n_simulations: int
+    graph: GraphShape
+    a: int
+    n: int
+    e: float
+    m: Optional[float]
+    max_epochs: int
+
 class SimResults(NamedTuple):
     ## Results for a given sim
     graph_shape: GraphShape
