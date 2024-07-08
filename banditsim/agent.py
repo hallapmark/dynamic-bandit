@@ -11,22 +11,32 @@ class Agent:
         self.expectation_B = random.uniform(0, 1)
         self.action_A_data = ExperimentData()
         self.action_B_data = ExperimentData()
-    
+        self.private_B_data = ExperimentData()
+
     def __str__(self):
         return f"expectation = {round(self.expectation_B, 2)}, k = {self.action_B_data.k}, n = {self.action_B_data.n}"
     
-    def experiment(self, n, epsilon):
+    def decide_experiment(self, n, epsilon):
         if self.expectation_B > .5:
-            self.action_B_data.k += random.binomial(n, .5 + epsilon)
-            self.action_B_data.n += n
+            self.experiment_B(n, epsilon)
         else:
-            self.action_A_data.k += random.binomial(n, .5)
-            self.action_A_data.n += n
+            self.experiment_A(n)
+
+    def experiment_A(self, n):
+        self.action_A_data.k += random.binomial(n, .5)
+        self.action_A_data.n += n
+
+    def experiment_B(self, n, epsilon):
+        self.action_B_data.k += random.binomial(n, .5 + epsilon)
+        self.action_B_data.n += n
+
+    def burn_in(self, n, epsilon):
+        self.private_B_data.k += random.binomial(n, .5 + epsilon)
+        self.private_B_data.n += n
 
     def expectation_B_update(self, k, n):
-        # self.credence = 1 / (1 + (1 - self.credence) * (((0.5 - epsilon) / (0.5 + epsilon)) ** (2 * k - n)) / self.credence)
         self.expectation_B = (k + 1) / (n + 2)
-    
+
     # def jeffrey_update(self, neighbor, epsilon, m):
     #     n = neighbor.n
     #     k = neighbor.k

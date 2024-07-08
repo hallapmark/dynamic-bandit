@@ -22,7 +22,12 @@ class Graph:
     def __str__(self):
         return "\n" + "\n".join([str(a) for a in self.agents])
 
-    def run_simulation(self, n, epsilon, m):
+    def run_simulation(self, n, epsilon, m, burn_in):
+        burn_in_rounds = 0
+        while burn_in_rounds < burn_in:
+            burn_in_rounds += 1
+            self.run_burn_in(n, epsilon)
+            
         ## TODO: Verify that this runs *exactly* the number of times we want
         while(self.undecided() and not (m and self.polarized(m)) and self.epoch < self.max_epochs):
             self.epoch += 1
@@ -54,11 +59,15 @@ class Graph:
                 # On average, over the long run, av util per agent per round converges to 0.5 for these networks ... 
                 # so maybe no point in calculating it, just set it to .5 as a baseline??? Hmm
                 self.av_utility = 0.5
-                self.result = 'stuck_on_A'
+                self.result = ResultType.FALSE_CONSENSUS
 
     def run_experiments(self, n, epsilon):
         for a in self.agents:
-            a.experiment(n, epsilon)
+            a.decide_experiment(n, epsilon)
+
+    def run_burn_in(self, n, epsilon):
+        for a in self.agents:
+            a.burn_in(n, epsilon)
 
     def expectation_update_agents(self):
         for a in self.agents:
@@ -66,6 +75,8 @@ class Graph:
             for neighbor in self.graph[a]:
                 total_k += neighbor.action_B_data.k
                 total_n += neighbor.action_B_data.n
+            total_k += a.private_B_data.k
+            total_n += a.private_B_data.n
             if total_n > 0:
                 a.expectation_B_update(total_k, total_n)
 

@@ -21,6 +21,7 @@ class SimResults(NamedTuple):
     trials: int
     epsilon: float
     mistrust: Optional[float]
+    burn_in: int
 
 class AnalyzedResults(NamedTuple):
     ## Analyzed results – averages over e.g. 5000 runs of sims
@@ -30,6 +31,7 @@ class AnalyzedResults(NamedTuple):
     trials: int
     epsilon: float
     mistrust: Optional[float]
+    burn_in: int
 
     prop_true_cons: float
     prop_false_cons: float

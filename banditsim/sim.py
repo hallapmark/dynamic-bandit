@@ -1,7 +1,6 @@
 import csv
 import os.path
 from multiprocessing import Pool
-from statistics import mean
 
 import numpy as np
 from banditsim.graph import Graph
@@ -10,21 +9,21 @@ from banditsim.models import AnalyzedResults, ResultType, SimResults
 def process(grid, path):
     for params in grid:
         print(params)
-        n_simulations, graph, a, n, e, m, max_epochs = params
+        n_simulations, graph, a, n, e, m, max_epochs, burn_in = params
         pool = Pool()
-        results = pool.starmap(run_simulation, ((graph, a, n, e, m, max_epochs),) * n_simulations)
+        results = pool.starmap(run_simulation, ((graph, a, n, e, m, max_epochs, burn_in),) * n_simulations)
         pool.close()
         pool.join()
         # for _ in range(n_simulations):
-        #     results = run_simulation(graph, a, n, e, m, max_epochs)
+        #     results = run_simulation(graph, a, n, e, m, max_epochs, burn_in)
         pathname, extension = os.path.splitext(path)
         record_data_dump(results, pathname + '_datadump' + extension)
         record_analysis(analyzed_results(results), path)
 
-def run_simulation(graph, a, n, e, m, max_epochs):
+def run_simulation(graph, a, n, e, m, max_epochs, burn_in):
     g = Graph(a, graph, max_epochs)
-    g.run_simulation(n, e, m)
-    return SimResults(graph, a, g.epoch, g.av_utility, g.result, n, e, m)
+    g.run_simulation(n, e, m, burn_in)
+    return SimResults(graph, a, g.epoch, g.av_utility, g.result, n, e, m, burn_in)
 
 def record_data_dump(simresults: list[SimResults], path):
     file_exists = os.path.isfile(path)
@@ -51,8 +50,8 @@ def analyzed_results(simresults: list[SimResults]):
     prop_false_cons = round(n_false_consensus / len(simresults), 3)
     prop_indeterminate = round(n_indeterminate_sims / len(simresults), 3)
 
-    av_utility = np.mean([res.av_utility for res in simresults])
+    av_utility = round(np.mean([res.av_utility for res in simresults]), 3)
 
-    sim = simresults[0]
-    return AnalyzedResults(sim.graph_shape, sim.agents, av_utility, sim.trials, sim.epsilon, sim.mistrust,
+    sim = simresults[0] # grab metadata/params
+    return AnalyzedResults(sim.graph_shape, sim.agents, av_utility, sim.trials, sim.epsilon, sim.mistrust, sim.burn_in,
                            prop_true_cons, prop_false_cons, prop_indeterminate)
