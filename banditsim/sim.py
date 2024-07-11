@@ -4,14 +4,14 @@ from multiprocessing import Pool
 
 import numpy as np
 from banditsim.graph import Graph
-from banditsim.models import AnalyzedResults, ResultType, SimResults
+from banditsim.models import AnalyzedResults, DynamicEpsilonConfig, ResultType, SimResults
 
 def process(grid, path):
     for params in grid:
         print(params)
-        n_simulations, graph, a, n, e, m, max_epochs, burn_in = params
+        n_simulations, graph, a, n, e, m, max_epochs, burn_in, epsilon_changes = params
         pool = Pool()
-        results = pool.starmap(run_simulation, ((graph, a, n, e, m, max_epochs, burn_in),) * n_simulations)
+        results = pool.starmap(run_simulation, ((graph, a, n, e, m, max_epochs, burn_in, epsilon_changes),) * n_simulations)
         pool.close()
         pool.join()
         # for _ in range(n_simulations):
@@ -20,10 +20,10 @@ def process(grid, path):
         record_data_dump(results, pathname + '_datadump' + extension)
         record_analysis(analyzed_results(results), path)
 
-def run_simulation(graph, a, n, e, m, max_epochs, burn_in):
-    g = Graph(a, graph, max_epochs)
-    g.run_simulation(n, e, m, burn_in)
-    return SimResults(graph, a, g.epoch, g.av_utility, g.result, n, e, m, burn_in)
+def run_simulation(graph, a, n, e, m, max_epochs, burn_in, epsilon_changes: DynamicEpsilonConfig):
+    g = Graph(a, graph, max_epochs, e, epsilon_changes)
+    g.run_simulation(n, m, burn_in)
+    return SimResults(graph, a, max_epochs, g.epoch, g.av_utility, g.result, n, e, m, burn_in, epsilon_changes.change_after_n_rounds, epsilon_changes.epsilon_d)
 
 def record_data_dump(simresults: list[SimResults], path):
     file_exists = os.path.isfile(path)
@@ -53,5 +53,6 @@ def analyzed_results(simresults: list[SimResults]):
     av_utility = round(np.mean([res.av_utility for res in simresults]), 3)
 
     sim = simresults[0] # grab metadata/params
-    return AnalyzedResults(sim.graph_shape, sim.agents, av_utility, sim.trials, sim.epsilon, sim.mistrust, sim.burn_in,
-                           prop_true_cons, prop_false_cons, prop_indeterminate)
+    return AnalyzedResults(sim.graph_shape, sim.agents, sim.trials, sim.epsilon, sim.max_epochs, sim.mistrust, sim.burn_in, 
+                           sim.e_change_n_rounds, sim.epsilon_d, av_utility, prop_true_cons, prop_false_cons, 
+                           prop_indeterminate)

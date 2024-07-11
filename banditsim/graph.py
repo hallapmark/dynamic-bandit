@@ -1,16 +1,20 @@
 from banditsim.agent import Agent
 import numpy as np
-from typing import Dict
+from typing import Dict, Optional
 
-from banditsim.models import GraphShape, ResultType
+from banditsim.models import DynamicEpsilonConfig, GraphShape, ResultType
 
 class Graph:
-    def __init__(self, a, shape: GraphShape, max_epochs):
+    def __init__(self, a: int, shape: GraphShape, max_epochs: int, epsilon: float, epsilon_changes: Optional[DynamicEpsilonConfig] = None):
         np.random.seed()
         self.agents = [Agent() for i in range(a)]
         self.graph: dict[Agent, list[Agent]] = dict()
         self.epoch = 0
         self.max_epochs = max_epochs
+        self.epsilon = epsilon
+        self.epsilon_changes = epsilon_changes
+        if self.epsilon_changes:
+            self.rounds_to_e_change = self.epsilon_changes.change_after_n_rounds
 
         if shape == GraphShape.CYCLE:
             for i in range(a):
@@ -22,22 +26,20 @@ class Graph:
     def __str__(self):
         return "\n" + "\n".join([str(a) for a in self.agents])
 
-    def run_simulation(self, n, epsilon, m, burn_in):
-        burn_in_rounds = 0
-        while burn_in_rounds < burn_in:
-            burn_in_rounds += 1
-            self.run_burn_in(n, epsilon)
-            
+    def run_simulation(self, n: int, m: Optional[float], burn_in: int):
+        self.run_burn_in(n, burn_in, self.epsilon)
+
         ## TODO: Verify that this runs *exactly* the number of times we want
-        while(self.undecided() and not (m and self.polarized(m)) and self.epoch < self.max_epochs):
+        while self.should_continue(m):
             self.epoch += 1
-            self.run_experiments(n, epsilon)
+            self.run_experiments(n, self.epsilon)
             if m:
                 # self.jeffrey_update_agents(epsilon, m)
                 raise NotImplementedError("Jeffrey/distrust updating not implemented.")
             else:
                 self.expectation_update_agents()
-        
+            if self.epsilon_changes:
+                self.change_epsilon(self.epsilon_changes)
         if m:
             # self.conclusion = self.polarized(m)
             raise NotImplementedError("Jeffrey/distrust updating not implemented.")
@@ -61,14 +63,26 @@ class Graph:
                 self.av_utility = 0.5
                 self.result = ResultType.FALSE_CONSENSUS
 
+    def should_continue(self, m: Optional[float]):
+        if m:
+            raise NotImplementedError("Distrust updating not implemented")
+            #return self.undecided() and not (m and self.polarized(m)) and self.epoch < self.max_epochs)
+        if self.epsilon_changes:
+            return self.epoch < self.max_epochs
+        else:
+            return self.undecided() and self.epoch < self.max_epochs 
+
+    def run_burn_in(self, n, burn_in, epsilon):
+        burn_in_rounds = 0
+        while burn_in_rounds < burn_in:
+            burn_in_rounds += 1
+            for a in self.agents:
+                a.burn_in(n, epsilon)
+
     def run_experiments(self, n, epsilon):
         for a in self.agents:
             a.decide_experiment(n, epsilon)
-
-    def run_burn_in(self, n, epsilon):
-        for a in self.agents:
-            a.burn_in(n, epsilon)
-
+        
     def expectation_update_agents(self):
         for a in self.agents:
             total_k, total_n = 0, 0
@@ -79,6 +93,14 @@ class Graph:
             total_n += a.private_B_data.n
             if total_n > 0:
                 a.expectation_B_update(total_k, total_n)
+    
+    def change_epsilon(self, epsilon_changes: DynamicEpsilonConfig):
+        self.rounds_to_e_change -= 1
+        if self.rounds_to_e_change > 0:
+            return
+        self.epsilon -= epsilon_changes.epsilon_d
+        self.rounds_to_e_change = epsilon_changes.change_after_n_rounds
+
 
     # def jeffrey_update_agents(self, epsilon, m):
     #     for a in self.agents:
