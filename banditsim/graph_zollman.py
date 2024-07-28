@@ -77,12 +77,11 @@ class ZollmanGraph:
 
     def undecided(self):
         expectations = np.array([a.expectation_B for a in self.agents])
-        #if all credences are .5 or less, then (or) is true. Then returns false. 
-        # i.e. the network is not undecided, and the simulation stops 
-        return not (all(expectations <= .5) or all(expectations > .99)) 
-        # TODO: > .99 doesn't really make sense with expectation updating.
-        # But I also don't see any harm in this, we'll just run until max rounds.
-        # But this would need fixing if we ever care about the *speed* with which a 
-        # network reaches consensus on B. Then, we'd want to detect when we can reasonably
-        # say that a network has reached consensus on B.
+        return not all(expectations <= .5)
+        # NOTE: Zollman's condition was something like
+        # return not (all(credences <= .5) or all(credences > .99))
+        # But > .99 doesn't really make sense with expectation updating, we don't
+        # *want* the agents to have expectation > .99 when really it should be, e.g. , .501.
+        # We could think of some other way to determine when the network
+        # is in consensus on the true view, but for now we'll just let it run to max rounds.
         
