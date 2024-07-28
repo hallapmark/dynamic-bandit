@@ -4,7 +4,7 @@ from typing import Optional
 
 from banditsim.models import DynamicEpsilonConfig, GraphShape, ResultType
 
-class DynamicBanditGraph:
+class Graph:
     def __init__(self, a: int, shape: GraphShape, max_epochs: int, epsilon: float, epsilon_changes: Optional[DynamicEpsilonConfig] = None):
         np.random.seed()
         self.agents = [Agent() for i in range(a)]

@@ -4,8 +4,7 @@ from multiprocessing import Pool
 from typing import Optional
 
 import numpy as np
-from banditsim.graph_dynamic_bandit import DynamicBanditGraph
-from banditsim.graph_zollman import ZollmanGraph
+from banditsim.graph import Graph
 from banditsim.models import AnalyzedResults, DynamicEpsilonConfig, ResultType, SimResults
 
 def process(grid, path):
@@ -23,10 +22,7 @@ def process(grid, path):
         record_analysis(analyzed_results(results), path)
 
 def run_simulation(graph, a, n, e, max_epochs, burn_in, epsilon_changes: Optional[DynamicEpsilonConfig]):
-    if epsilon_changes:
-        g = DynamicBanditGraph(a, graph, max_epochs, e, epsilon_changes)
-    else:
-        g = ZollmanGraph(a, graph, max_epochs, e)
+    g = Graph(a, graph, max_epochs, e, epsilon_changes)
     g.run_simulation(n, burn_in)
     e_change_n_rounds = epsilon_changes.change_after_n_rounds if epsilon_changes else None
     epsilon_d = epsilon_changes.epsilon_d if epsilon_changes else None
