@@ -34,9 +34,9 @@ class AnalyzedResults(NamedTuple):
     ## Config
     graph_shape: GraphShape
     agents: int
+    max_epochs: int
     trials: int
     epsilon: float
-    max_epochs: int
     burn_in: int
     e_change_n_rounds: Optional[bool]
     epsilon_d: Optional[bool]

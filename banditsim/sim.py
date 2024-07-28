@@ -56,6 +56,6 @@ def analyzed_results(simresults: list[SimResults]):
     av_utility = round(np.mean([res.av_utility for res in simresults]), 3)
 
     sim = simresults[0] # grab metadata/params
-    return AnalyzedResults(sim.graph_shape, sim.agents, sim.trials, sim.epsilon, sim.max_epochs, sim.burn_in, 
+    return AnalyzedResults(sim.graph_shape, sim.agents, sim.max_epochs, sim.trials, sim.epsilon, sim.burn_in,
                            sim.e_change_n_rounds, sim.epsilon_d, av_utility, prop_true_cons, prop_false_cons, 
                            prop_indeterminate)
