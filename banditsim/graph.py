@@ -27,12 +27,12 @@ class Graph:
         return "\n" + "\n".join([str(a) for a in self.agents])
 
     def run_simulation(self, n: int, burn_in: int):
-        self.run_burn_in(n, burn_in, self.epsilon)
+        self.run_burn_in(n, burn_in, .5 + self.epsilon)
 
         ## TODO: Verify that this runs *exactly* the number of times we want
         while self.should_continue():
             self.epoch += 1
-            self.run_experiments(n, self.epsilon)
+            self.run_experiments(n, .5 + self.epsilon)
             self.expectation_update_agents()
             if self.epsilon_changes:
                 self.change_epsilon(self.epsilon_changes)
@@ -45,16 +45,16 @@ class Graph:
     def should_continue(self):
         return self.epoch < self.max_epochs
 
-    def run_burn_in(self, n, burn_in, epsilon):
+    def run_burn_in(self, n, burn_in, p):
         burn_in_rounds = 0
         while burn_in_rounds < burn_in:
             burn_in_rounds += 1
             for a in self.agents:
-                a.burn_in(n, epsilon)
+                a.burn_in(n, p)
 
-    def run_experiments(self, n, epsilon):
+    def run_experiments(self, n, p):
         for a in self.agents:
-            a.decide_experiment(n, epsilon)
+            a.decide_experiment(n, p)
         
     def expectation_update_agents(self):
         for a in self.agents:

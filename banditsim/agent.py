@@ -16,9 +16,9 @@ class Agent:
     def __str__(self):
         return f"expectation = {round(self.expectation_B, 2)}, k = {self.action_B_data.k}, n = {self.action_B_data.n}"
     
-    def decide_experiment(self, n, epsilon):
+    def decide_experiment(self, n, p):
         if self.expectation_B > .5:
-            self.experiment_B(n, epsilon)
+            self.experiment_B(n, p)
         else:
             self.experiment_A(n)
 
@@ -26,12 +26,12 @@ class Agent:
         self.action_A_data.k += random.binomial(n, .5)
         self.action_A_data.n += n
 
-    def experiment_B(self, n, epsilon):
-        self.action_B_data.k += random.binomial(n, .5 + epsilon)
+    def experiment_B(self, n, p):
+        self.action_B_data.k += random.binomial(n, p)
         self.action_B_data.n += n
 
-    def burn_in(self, n, epsilon):
-        self.private_B_data.k += random.binomial(n, .5 + epsilon)
+    def burn_in(self, n, p):
+        self.private_B_data.k += random.binomial(n, p)
         self.private_B_data.n += n
 
     def expectation_B_update(self, k, n):
