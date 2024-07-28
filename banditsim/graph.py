@@ -2,7 +2,7 @@ from banditsim.agent import Agent
 import numpy as np
 from typing import Optional
 
-from banditsim.models import DynamicEpsilonConfig, GraphShape, ResultType
+from banditsim.models import DynamicEpsilonConfig, GraphShape
 
 class Graph:
     def __init__(self, a: int, shape: GraphShape, max_epochs: int, epsilon: float, epsilon_changes: Optional[DynamicEpsilonConfig] = None):
@@ -40,21 +40,7 @@ class Graph:
         # each win/success k of the n pulls, has a util of "1"
         # We sum up the utils from action A and B to get the total util agents managed to pull
         tot_utility = sum([a.action_A_data.k for a in self.agents] + [a.action_B_data.k for a in self.agents])
-        if self.epoch > 0:
-            self.av_utility = (tot_utility / len(self.agents)) / self.epoch # Av round utility per agent
-            expectations = np.array([a.expectation_B for a in self.agents])
-            if all(expectations <= .5):
-                self.result = ResultType.FALSE_CONSENSUS
-            elif all(expectations > .5):
-                self.result = ResultType.TRUE_CONSENSUS
-            else:
-                self.result = ResultType.INDETERMINATE
-        else:
-            # TODO: Do we calculate util from networks that epistemically fail on round 1 (that never go to action B)?
-            # On average, over the long run, av util per agent per round converges to 0.5 for these networks ... 
-            # so maybe no point in calculating it, just set it to .5 as a baseline??? Hmm
-            self.av_utility = 0.5
-            self.result = ResultType.FALSE_CONSENSUS
+        self.av_utility = (tot_utility / len(self.agents)) / self.epoch # Av round utility per agent
 
     def should_continue(self):
         return self.epoch < self.max_epochs
