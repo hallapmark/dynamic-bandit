@@ -89,26 +89,9 @@ class DynamicBanditGraph:
         self.rounds_to_e_change = epsilon_changes.change_after_n_rounds
 
 
-    # def jeffrey_update_agents(self, epsilon, m):
-    #     for a in self.agents:
-    #         for neighbor in self.graph[a]:
-    #             if neighbor == a and a.n > 0:
-    #                 a.bayes_update(a.k, a.n, epsilon)
-    #             elif neighbor.n > 0:
-    #                 a.jeffrey_update(neighbor, epsilon, m)
-
     def undecided(self):
         expectations = np.array([a.expectation_B for a in self.agents])
-        #if all credences are .5 or less, then (or) is true. Then returns false. 
-        # i.e. the network is not undecided, and the simulation stops 
-        return not (all(expectations <= .5) or all(expectations > .99)) 
-
-    # def polarized(self, m):
-    #     credences = np.array([a.credence for a in self.agents])
-    #     if all((credences < .5) | (credences > .99)) & any(credences < .5) & any(credences > .99):
-    #         min_believer = min(credences[credences > .99])
-    #         max_disbeliever = max(credences[credences < .5])
-    #         d = min_believer - max_disbeliever
-    #         return m * d >= 1
-    #     else:
-    #         return False
+        #if all credences are .5 or less, then (or) is true. Then returns false.
+        # i.e. the network is not undecided, and the simulation stops
+        return not (all(expectations <= .5) or all(expectations > .99))
+    
