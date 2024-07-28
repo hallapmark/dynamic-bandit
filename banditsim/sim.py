@@ -1,17 +1,19 @@
 import csv
 import os.path
 from multiprocessing import Pool
+from typing import Optional
 
 import numpy as np
-from banditsim.graph import Graph
+from banditsim.graph_dynamic_bandit import DynamicBanditGraph
+from banditsim.graph_zollman import ZollmanGraph
 from banditsim.models import AnalyzedResults, DynamicEpsilonConfig, ResultType, SimResults
 
 def process(grid, path):
     for params in grid:
         print(params)
-        n_simulations, graph, a, n, e, m, max_epochs, burn_in, epsilon_changes = params
+        n_simulations, graph, a, n, e, max_epochs, burn_in, epsilon_changes = params
         pool = Pool()
-        results = pool.starmap(run_simulation, ((graph, a, n, e, m, max_epochs, burn_in, epsilon_changes),) * n_simulations)
+        results = pool.starmap(run_simulation, ((graph, a, n, e, max_epochs, burn_in, epsilon_changes),) * n_simulations)
         pool.close()
         pool.join()
         # for _ in range(n_simulations):
@@ -20,10 +22,15 @@ def process(grid, path):
         record_data_dump(results, pathname + '_datadump' + extension)
         record_analysis(analyzed_results(results), path)
 
-def run_simulation(graph, a, n, e, m, max_epochs, burn_in, epsilon_changes: DynamicEpsilonConfig):
-    g = Graph(a, graph, max_epochs, e, epsilon_changes)
-    g.run_simulation(n, m, burn_in)
-    return SimResults(graph, a, max_epochs, g.epoch, g.av_utility, g.result, n, e, m, burn_in, epsilon_changes.change_after_n_rounds, epsilon_changes.epsilon_d)
+def run_simulation(graph, a, n, e, max_epochs, burn_in, epsilon_changes: Optional[DynamicEpsilonConfig]):
+    if epsilon_changes:
+        g = DynamicBanditGraph(a, graph, max_epochs, e, epsilon_changes)
+    else:
+        g = ZollmanGraph(a, graph, max_epochs, e)
+    g.run_simulation(n, burn_in)
+    e_change_n_rounds = epsilon_changes.change_after_n_rounds if epsilon_changes else None
+    epsilon_d = epsilon_changes.epsilon_d if epsilon_changes else None
+    return SimResults(graph, a, max_epochs, g.epoch, g.av_utility, g.result, n, e, burn_in, e_change_n_rounds, epsilon_d)
 
 def record_data_dump(simresults: list[SimResults], path):
     file_exists = os.path.isfile(path)
@@ -53,6 +60,6 @@ def analyzed_results(simresults: list[SimResults]):
     av_utility = round(np.mean([res.av_utility for res in simresults]), 3)
 
     sim = simresults[0] # grab metadata/params
-    return AnalyzedResults(sim.graph_shape, sim.agents, sim.trials, sim.epsilon, sim.max_epochs, sim.mistrust, sim.burn_in, 
+    return AnalyzedResults(sim.graph_shape, sim.agents, sim.trials, sim.epsilon, sim.max_epochs, sim.burn_in, 
                            sim.e_change_n_rounds, sim.epsilon_d, av_utility, prop_true_cons, prop_false_cons, 
                            prop_indeterminate)

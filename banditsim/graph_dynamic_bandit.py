@@ -1,10 +1,10 @@
 from banditsim.agent import Agent
 import numpy as np
-from typing import Dict, Optional
+from typing import Optional
 
 from banditsim.models import DynamicEpsilonConfig, GraphShape, ResultType
 
-class Graph:
+class DynamicBanditGraph:
     def __init__(self, a: int, shape: GraphShape, max_epochs: int, epsilon: float, epsilon_changes: Optional[DynamicEpsilonConfig] = None):
         np.random.seed()
         self.agents = [Agent() for i in range(a)]
@@ -26,51 +26,38 @@ class Graph:
     def __str__(self):
         return "\n" + "\n".join([str(a) for a in self.agents])
 
-    def run_simulation(self, n: int, m: Optional[float], burn_in: int):
+    def run_simulation(self, n: int, burn_in: int):
         self.run_burn_in(n, burn_in, self.epsilon)
 
         ## TODO: Verify that this runs *exactly* the number of times we want
-        while self.should_continue(m):
+        while self.should_continue():
             self.epoch += 1
             self.run_experiments(n, self.epsilon)
-            if m:
-                # self.jeffrey_update_agents(epsilon, m)
-                raise NotImplementedError("Jeffrey/distrust updating not implemented.")
-            else:
-                self.expectation_update_agents()
+            self.expectation_update_agents()
             if self.epsilon_changes:
                 self.change_epsilon(self.epsilon_changes)
-        if m:
-            # self.conclusion = self.polarized(m)
-            raise NotImplementedError("Jeffrey/distrust updating not implemented.")
-        else:
-            # each win/success k of the n pulls, has a util of "1"
-            # We sum up the utils from action A and B to get the total util agents managed to pull
-            tot_utility = sum([a.action_A_data.k for a in self.agents] + [a.action_B_data.k for a in self.agents])
-            if self.epoch > 0:
-                self.av_utility = (tot_utility / len(self.agents)) / self.epoch # Av round utility per agent
-                expectations = np.array([a.expectation_B for a in self.agents])
-                if all(expectations <= .5):
-                    self.result = ResultType.FALSE_CONSENSUS
-                elif all(expectations > .5):
-                    self.result = ResultType.TRUE_CONSENSUS
-                else:
-                    self.result = ResultType.INDETERMINATE
-            else:
-                # TODO: Do we calculate util from networks that epistemically fail on round 1 (that never go to action B)?
-                # On average, over the long run, av util per agent per round converges to 0.5 for these networks ... 
-                # so maybe no point in calculating it, just set it to .5 as a baseline??? Hmm
-                self.av_utility = 0.5
-                self.result = ResultType.FALSE_CONSENSUS
 
-    def should_continue(self, m: Optional[float]):
-        if m:
-            raise NotImplementedError("Distrust updating not implemented")
-            #return self.undecided() and not (m and self.polarized(m)) and self.epoch < self.max_epochs)
-        if self.epsilon_changes:
-            return self.epoch < self.max_epochs
+        # each win/success k of the n pulls, has a util of "1"
+        # We sum up the utils from action A and B to get the total util agents managed to pull
+        tot_utility = sum([a.action_A_data.k for a in self.agents] + [a.action_B_data.k for a in self.agents])
+        if self.epoch > 0:
+            self.av_utility = (tot_utility / len(self.agents)) / self.epoch # Av round utility per agent
+            expectations = np.array([a.expectation_B for a in self.agents])
+            if all(expectations <= .5):
+                self.result = ResultType.FALSE_CONSENSUS
+            elif all(expectations > .5):
+                self.result = ResultType.TRUE_CONSENSUS
+            else:
+                self.result = ResultType.INDETERMINATE
         else:
-            return self.undecided() and self.epoch < self.max_epochs 
+            # TODO: Do we calculate util from networks that epistemically fail on round 1 (that never go to action B)?
+            # On average, over the long run, av util per agent per round converges to 0.5 for these networks ... 
+            # so maybe no point in calculating it, just set it to .5 as a baseline??? Hmm
+            self.av_utility = 0.5
+            self.result = ResultType.FALSE_CONSENSUS
+
+    def should_continue(self):
+        return self.epoch < self.max_epochs
 
     def run_burn_in(self, n, burn_in, epsilon):
         burn_in_rounds = 0

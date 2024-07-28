@@ -25,7 +25,6 @@ class SimResults(NamedTuple):
     result: ResultType
     trials: int
     epsilon: float
-    mistrust: Optional[float]
     burn_in: int
     e_change_n_rounds: Optional[bool]
     epsilon_d: Optional[bool]
@@ -38,7 +37,6 @@ class AnalyzedResults(NamedTuple):
     trials: int
     epsilon: float
     max_epochs: int
-    mistrust: Optional[float]
     burn_in: int
     e_change_n_rounds: Optional[bool]
     epsilon_d: Optional[bool]
