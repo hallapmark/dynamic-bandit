@@ -9,10 +9,10 @@ if __name__ == '__main__':
     max_epochs = 4000
     ## Zollman 2007 but with expectation updating. 
     grid = [(s, GraphShape.COMPLETE, a, 1000, .001, max_epochs, burn_in, None) 
-            for a in range(9, 11) # 4, 12
+            for a in range(4, 6) # 4, 12
             for burn_in in range(0, 2)]
     grid += [(s, GraphShape.CYCLE, a, 1000, .001, max_epochs, burn_in, None) 
-             for a in range(9, 11)
+             for a in range(4, 6)
              for burn_in in range(0, 2)]
     
     # Larger epsilon (Rosenstock et al. 2017 but again with expectation updating)

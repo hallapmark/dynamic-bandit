@@ -87,11 +87,4 @@ class DynamicBanditGraph:
             return
         self.epsilon -= epsilon_changes.epsilon_d
         self.rounds_to_e_change = epsilon_changes.change_after_n_rounds
-
-
-    def undecided(self):
-        expectations = np.array([a.expectation_B for a in self.agents])
-        #if all credences are .5 or less, then (or) is true. Then returns false.
-        # i.e. the network is not undecided, and the simulation stops
-        return not (all(expectations <= .5) or all(expectations > .99))
-    
+        
