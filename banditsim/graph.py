@@ -40,7 +40,7 @@ class Graph:
         # each win/success k of the n pulls, has a util of "1"
         # We sum up the utils from action A and B to get the total util agents managed to pull
         tot_utility = sum([a.action_A_data.k for a in self.agents] + [a.action_B_data.k for a in self.agents])
-        self.av_utility = (tot_utility / len(self.agents)) / self.epoch # Av round utility per agent
+        self.av_utility = (tot_utility / len(self.agents)) / self.epoch / n # Av utility per round per agent per trial
 
     def should_continue(self):
         return self.epoch < self.max_epochs

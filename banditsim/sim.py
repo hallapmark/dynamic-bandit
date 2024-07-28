@@ -48,7 +48,7 @@ def record_analysis(analyzed_results: AnalyzedResults, path):
         writer.writerow([result_val for result_val in analyzed_results])
 
 def analyzed_results(simresults: list[SimResults]):
-    av_utility = round(np.mean([res.av_utility for res in simresults]), 3)
+    av_utility = round(np.mean([res.av_utility for res in simresults]), 5)
     sim = simresults[0] # grab metadata/params
     return AnalyzedResults(sim.graph_shape, sim.agents, sim.max_epochs, sim.trials, sim.epsilon,
                            sim.burn_in, sim.e_change_n_rounds, sim.epsilon_d, av_utility)

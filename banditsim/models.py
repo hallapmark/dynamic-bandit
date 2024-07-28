@@ -24,7 +24,7 @@ class SimResults(NamedTuple):
 
     # Outcome
     epochs: int
-    av_utility: float # per agent per round
+    av_utility: float # per agent per round per trial
 
 class AnalyzedResults(NamedTuple):
     ## Analyzed results – includes averages over e.g. 5000 runs of sims of a given configuration
