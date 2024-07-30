@@ -1,20 +1,17 @@
-from banditsim.agent import Agent
 import numpy as np
-from typing import Optional
 
-from banditsim.models import DynamicEpsilonConfig, GraphShape
+from banditsim.agent import Agent
+from banditsim.models import GraphShape
 
 class Graph:
-    def __init__(self, a: int, shape: GraphShape, max_epochs: int, epsilon: float, epsilon_changes: Optional[DynamicEpsilonConfig] = None):
+    def __init__(self, a: int, shape: GraphShape, max_epochs: int, max_epsilon: float, epsilon_sine_period: float):
         np.random.seed()
-        self.agents = [Agent() for i in range(a)]
+        self.agents = [Agent() for _ in range(a)]
         self.graph: dict[Agent, list[Agent]] = dict()
         self.epoch = 0
         self.max_epochs = max_epochs
-        self.epsilon = epsilon
-        self.epsilon_changes = epsilon_changes
-        if self.epsilon_changes:
-            self.rounds_to_e_change = self.epsilon_changes.change_after_n_rounds
+        self.max_epsilon = max_epsilon
+        self.epsilon_sine_period = epsilon_sine_period
 
         if shape == GraphShape.CYCLE:
             for i in range(a):
@@ -27,23 +24,21 @@ class Graph:
         return "\n" + "\n".join([str(a) for a in self.agents])
 
     def run_simulation(self, n: int, burn_in: int):
-        self.run_burn_in(n, burn_in, .5 + self.epsilon)
+        self.run_burn_in(n, burn_in, .5 + self.max_epsilon)
+        t = np.arange(0, self.max_epochs, 1)
+        self.epsilons = self.sine_epsilons(self.max_epsilon, t, self.epsilon_sine_period)
 
         ## TODO: Verify that this runs *exactly* the number of times we want
-        while self.should_continue():
-            self.epoch += 1
-            self.run_experiments(n, .5 + self.epsilon)
+        while self.epoch < self.max_epochs:
+            self.run_experiments(n, self.epoch)
             self.expectation_update_agents()
-            if self.epsilon_changes:
-                self.change_epsilon(self.epsilon_changes)
+            self.epoch += 1
 
         # each win/success k of the n pulls, has a util of "1"
         # We sum up the utils from action A and B to get the total util agents managed to pull
         tot_utility = sum([a.action_A_data.k for a in self.agents] + [a.action_B_data.k for a in self.agents])
-        self.av_utility = (tot_utility / len(self.agents)) / self.epoch / n # Av utility per round per agent per trial
-
-    def should_continue(self):
-        return self.epoch < self.max_epochs
+        self.av_utility = (tot_utility / len(self.agents)) / self.epoch / n
+        # Av utility per round per agent per trial
 
     def run_burn_in(self, n, burn_in, p):
         burn_in_rounds = 0
@@ -52,7 +47,9 @@ class Graph:
             for a in self.agents:
                 a.burn_in(n, p)
 
-    def run_experiments(self, n, p):
+    def run_experiments(self, n, epoch):
+        e = self.epsilons[epoch]
+        p = 0.5 + e
         for a in self.agents:
             a.decide_experiment(n, p)
         
@@ -67,10 +64,9 @@ class Graph:
             if total_n > 0:
                 a.expectation_B_update(total_k, total_n)
     
-    def change_epsilon(self, epsilon_changes: DynamicEpsilonConfig):
-        self.rounds_to_e_change -= 1
-        if self.rounds_to_e_change > 0:
-            return
-        self.epsilon -= epsilon_changes.epsilon_d
-        self.rounds_to_e_change = epsilon_changes.change_after_n_rounds
+    def sine_epsilons(self, max_epsilon: float, t: np.ndarray, period: int):
+        """ Returns a numpy array of epsilons (floats) shaped like a sine wave
+        fluctuating between max_epsilon and -max_epsilon in amplitude."""
+        b = 2 * np.pi  / period
+        return max_epsilon * np.sin(b * (t + period / 4))
         

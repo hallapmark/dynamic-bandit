@@ -1,14 +1,10 @@
 ## RESULTS
 from enum import Enum, auto
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 class GraphShape(Enum):
     COMPLETE = auto()
     CYCLE = auto()
-
-class DynamicEpsilonConfig(NamedTuple):
-    change_after_n_rounds: int
-    epsilon_d: float
 
 class SimResults(NamedTuple):
     ## Results for a given sim
@@ -17,10 +13,9 @@ class SimResults(NamedTuple):
     agents: int
     max_epochs: int
     trials: int
-    epsilon: float
+    max_epsilon: float
+    sine_period: int
     burn_in: int
-    e_change_n_rounds: Optional[bool]
-    epsilon_d: Optional[bool]
 
     # Outcome
     epochs: int
@@ -33,10 +28,9 @@ class AnalyzedResults(NamedTuple):
     agents: int
     max_epochs: int
     trials: int
-    epsilon: float
+    max_epsilon: float
+    sine_period: int
     burn_in: int
-    e_change_n_rounds: Optional[bool]
-    epsilon_d: Optional[bool]
 
     # Results over all sims
     av_utility: float

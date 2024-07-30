@@ -1,34 +1,30 @@
 import csv
 import os.path
 from multiprocessing import Pool
-from typing import Optional
 import numpy as np
 
 from banditsim.graph import Graph
-from banditsim.models import AnalyzedResults, DynamicEpsilonConfig, SimResults
+from banditsim.models import AnalyzedResults, SimResults
 
 def process(grid, path):
     for params in grid:
         print(params)
-        n_simulations, graph, a, n, e, max_epochs, burn_in, epsilon_changes = params
+        n_simulations, graph, a, n, max_epsilon, sine_period, max_epochs, burn_in = params
         pool = Pool()
         results = pool.starmap(
-            run_simulation, ((graph, a, n, e, max_epochs, burn_in, epsilon_changes),) * n_simulations)
+            run_simulation, ((graph, a, n, max_epsilon, sine_period, max_epochs, burn_in),) * n_simulations)
         pool.close()
         pool.join()
         # for _ in range(n_simulations):
-        #     results = run_simulation(graph, a, n, e, m, max_epochs, burn_in)
+        #     results = run_simulation(graph, a, n, max_epsilon, sine_period, max_epochs, burn_in)
         pathname, extension = os.path.splitext(path)
         record_data_dump(results, pathname + '_datadump' + extension)
         record_analysis(analyzed_results(results), path)
 
-def run_simulation(graph, a, n, e, max_epochs, burn_in, epsilon_changes: Optional[DynamicEpsilonConfig]):
-    g = Graph(a, graph, max_epochs, e, epsilon_changes)
+def run_simulation(graph, a, n, max_epsilon, sine_period, max_epochs, burn_in):
+    g = Graph(a, graph, max_epochs, max_epsilon, sine_period)
     g.run_simulation(n, burn_in)
-    e_change_n_rounds = epsilon_changes.change_after_n_rounds if epsilon_changes else None
-    epsilon_d = epsilon_changes.epsilon_d if epsilon_changes else None
-    return SimResults(graph, a, max_epochs, n, e, burn_in, e_change_n_rounds,
-                      epsilon_d, g.epoch, g.av_utility)
+    return SimResults(graph, a, max_epochs, n, max_epsilon, sine_period, burn_in, g.epoch, g.av_utility)
 
 def record_data_dump(simresults: list[SimResults], path):
     file_exists = os.path.isfile(path)
@@ -50,5 +46,5 @@ def record_analysis(analyzed_results: AnalyzedResults, path):
 def analyzed_results(simresults: list[SimResults]):
     av_utility = round(np.mean([res.av_utility for res in simresults]), 5)
     sim = simresults[0] # grab metadata/params
-    return AnalyzedResults(sim.graph_shape, sim.agents, sim.max_epochs, sim.trials, sim.epsilon,
-                           sim.burn_in, sim.e_change_n_rounds, sim.epsilon_d, av_utility)
+    return AnalyzedResults(sim.graph_shape, sim.agents, sim.max_epochs, sim.trials, sim.max_epsilon,
+                           sim.sine_period, sim.burn_in, av_utility)

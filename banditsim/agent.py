@@ -1,6 +1,4 @@
 from numpy import random
-from typing import Optional, NamedTuple
-
 
 class ExperimentData:
     k: int = 0
