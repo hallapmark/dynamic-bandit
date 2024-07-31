@@ -15,7 +15,7 @@ class Agent:
         return f"expectation = {round(self.expectation_B, 2)}, k = {self.action_B_data.k}, n = {self.action_B_data.n}"
     
     def decide_experiment(self, n, p):
-        if self.expectation_B > .5:
+        if self.expectation_B >= .5:
             self.experiment_B(n, p)
         else:
             self.experiment_A(n)
