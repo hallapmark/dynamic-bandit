@@ -1,5 +1,6 @@
 import numpy as np
 
+from . import metrics
 from banditsim.agent import Agent
 from banditsim.models import GraphShape
 
@@ -8,11 +9,18 @@ class Graph:
         np.random.seed()
         self.agents = [Agent() for _ in range(a)]
         self.graph: dict[Agent, list[Agent]] = dict()
-        self.epoch = 0
+        self._epoch = 0
+
+        ## Config
         self.max_epochs = max_epochs
         self.max_epsilon = max_epsilon
-        self.epsilon_sine_period = epsilon_sine_period
+        t = np.arange(0, self.max_epochs, 1)
+        self.epsilons = self.sine_epsilons(max_epsilon, t, epsilon_sine_period)
 
+        ## Outcome
+        self.metrics = metrics.SimMetrics()
+
+        ## Structure the network
         if shape == GraphShape.CYCLE:
             for i in range(a):
                 self.graph[self.agents[i]] = [ self.agents[i - 1], self.agents[i], self.agents[(i + 1) % a] ]
@@ -20,25 +28,34 @@ class Graph:
             for i in range(a):
                 self.graph[self.agents[i]] = self.agents
     
+    @property
+    def epoch(self):
+        return self._epoch
+    
+    @epoch.setter
+    def epoch(self, value):
+        self.metrics.record_round_metrics(self)
+        self._epoch = value
+    
     def __str__(self):
         return "\n" + "\n".join([str(a) for a in self.agents])
 
     def run_simulation(self, n: int, burn_in: int):
         self.run_burn_in(n, burn_in, .5 + self.max_epsilon)
-        t = np.arange(0, self.max_epochs, 1)
-        self.epsilons = self.sine_epsilons(self.max_epsilon, t, self.epsilon_sine_period)
 
         ## TODO: Verify that this runs *exactly* the number of times we want
         while self.epoch < self.max_epochs:
             self.run_experiments(n, self.epoch)
             self.expectation_update_agents()
             self.epoch += 1
-
+ 
         # each win/success k of the n pulls, has a util of "1"
         # We sum up the utils from action A and B to get the total util agents managed to pull
         tot_utility = sum([a.action_A_data.k for a in self.agents] + [a.action_B_data.k for a in self.agents])
-        self.av_utility = (tot_utility / len(self.agents)) / self.epoch / n
         # Av utility per round per agent per trial
+        self.av_utility = (tot_utility / len(self.agents)) / self.epoch / n
+        # TODO: Move these into the metrics class
+        self.metrics.record_sim_end_metrics(self)
 
     def run_burn_in(self, n, burn_in, p):
         burn_in_rounds = 0

@@ -10,6 +10,7 @@ class Agent:
         self.action_A_data = ExperimentData()
         self.action_B_data = ExperimentData()
         self.private_B_data = ExperimentData()
+        self.round_action = "" # "A" or "B"
 
     def __str__(self):
         return f"expectation = {round(self.expectation_B, 2)}, k = {self.action_B_data.k}, n = {self.action_B_data.n}"
@@ -21,10 +22,12 @@ class Agent:
             self.experiment_A(n)
 
     def experiment_A(self, n):
+        self.round_action = "A"
         self.action_A_data.k += random.binomial(n, .5)
         self.action_A_data.n += n
 
     def experiment_B(self, n, p):
+        self.round_action = "B"
         self.action_B_data.k += random.binomial(n, p)
         self.action_B_data.n += n
 
