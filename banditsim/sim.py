@@ -5,6 +5,7 @@ import numpy as np
 
 from banditsim.graph import Graph
 from banditsim.models import AnalyzedResults, SimResults
+from plot import PlotSine
 
 def process(grid, path):
     for params in grid:
@@ -24,6 +25,8 @@ def process(grid, path):
 def run_simulation(graph, a, n, max_epsilon, sine_period, max_epochs, burn_in):
     g = Graph(a, graph, max_epochs, max_epsilon, sine_period)
     g.run_simulation(n, burn_in)
+    # plotsine = PlotSine(g.max_epochs, g.epsilons, g.metrics.average_expectations) # Uncomment to draw plot
+    # plotsine.makePlot() # Currently plot can only be drawn if multiprocessing is disabled above
     return SimResults(graph, a, max_epochs, n, max_epsilon, sine_period, burn_in, g.epoch,
                       g.metrics.sim_average_utility)
 
