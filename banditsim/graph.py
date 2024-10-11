@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import metrics
-from banditsim.agent import Agent
+from banditsim.agent import *
 from banditsim.models import GraphShape
 
 class Graph:
@@ -49,13 +49,7 @@ class Graph:
             self.expectation_update_agents()
             self.epoch += 1
  
-        # each win/success k of the n pulls, has a util of "1"
-        # We sum up the utils from action A and B to get the total util agents managed to pull
-        tot_utility = sum([a.action_A_data.k for a in self.agents] + [a.action_B_data.k for a in self.agents])
-        # Av utility per round per agent per trial
-        self.av_utility = (tot_utility / len(self.agents)) / self.epoch / n
-        # TODO: Move these into the metrics class
-        self.metrics.record_sim_end_metrics(self)
+        self.metrics.record_sim_end_metrics(self, n)
 
     def run_burn_in(self, n, burn_in, p):
         burn_in_rounds = 0

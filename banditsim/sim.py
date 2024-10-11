@@ -24,7 +24,8 @@ def process(grid, path):
 def run_simulation(graph, a, n, max_epsilon, sine_period, max_epochs, burn_in):
     g = Graph(a, graph, max_epochs, max_epsilon, sine_period)
     g.run_simulation(n, burn_in)
-    return SimResults(graph, a, max_epochs, n, max_epsilon, sine_period, burn_in, g.epoch, g.av_utility)
+    return SimResults(graph, a, max_epochs, n, max_epsilon, sine_period, burn_in, g.epoch,
+                      g.metrics.sim_average_utility)
 
 def record_data_dump(simresults: list[SimResults], path):
     file_exists = os.path.isfile(path)
