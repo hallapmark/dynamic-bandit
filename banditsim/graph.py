@@ -21,11 +21,12 @@ class Graph:
         self.metrics = metrics.SimMetrics()
 
         ## Structure the network
+        n_agents = len(self.agents)
         if shape == GraphShape.CYCLE:
-            for i in range(a):
+            for i in range(n_agents):
                 self.graph[self.agents[i]] = [ self.agents[i - 1], self.agents[i], self.agents[(i + 1) % a] ]
         elif shape == GraphShape.COMPLETE:
-            for i in range(a):
+            for i in range(n_agents):
                 self.graph[self.agents[i]] = self.agents
     
     @property
@@ -52,9 +53,9 @@ class Graph:
         self.metrics.record_sim_end_metrics(self, n)
 
     def run_burn_in(self, n, burn_in, p):
-        burn_in_rounds = 0
-        while burn_in_rounds < burn_in:
-            burn_in_rounds += 1
+        burn_in_round = 0
+        while burn_in_round < burn_in:
+            burn_in_round += 1
             for a in self.agents:
                 a.burn_in(n, p)
 
@@ -68,8 +69,10 @@ class Graph:
         for a in self.agents:
             total_k, total_n = 0, 0
             for neighbor in self.graph[a]:
+                # includes agent's own public data (every agent is their own neighbor)
                 total_k += neighbor.action_B_data.k
                 total_n += neighbor.action_B_data.n
+            # add burn-in data
             total_k += a.private_B_data.k
             total_n += a.private_B_data.n
             if total_n > 0:

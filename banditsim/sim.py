@@ -18,6 +18,7 @@ def process(grid, path):
         pool.join()
         # for _ in range(n_simulations):
         #     results = run_simulation(graph, a, n, max_epsilon, sine_period, max_epochs, burn_in)
+        #     break
         pathname, extension = os.path.splitext(path)
         record_data_dump(results, pathname + '_datadump' + extension)
         record_analysis(analyzed_results(results), path)
@@ -48,7 +49,7 @@ def record_analysis(analyzed_results: AnalyzedResults, path):
         writer.writerow([result_val for result_val in analyzed_results])
 
 def analyzed_results(simresults: list[SimResults]):
-    av_utility = round(np.mean([res.av_utility for res in simresults]), 5)
+    av_utility = round(np.mean([res.av_utility for res in simresults]), 7)
     sim = simresults[0] # grab metadata/params
     return AnalyzedResults(sim.graph_shape, sim.agents, sim.max_epochs, sim.trials, sim.max_epsilon,
                            sim.sine_period, sim.burn_in, av_utility)
