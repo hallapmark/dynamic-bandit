@@ -1,5 +1,7 @@
+from dataclasses import dataclass
 from numpy import random
 
+@dataclass
 class ExperimentData:
     k: int = 0
     n: int = 0
@@ -7,9 +9,9 @@ class ExperimentData:
 class Agent:
     def __init__(self):
         self.expectation_B = random.uniform(0, 1)
-        self.action_A_data = ExperimentData()
-        self.action_B_data = ExperimentData()
-        self.private_B_data = ExperimentData()
+        self.action_A_data: list[ExperimentData] = [] # Each element is one round's experiment data
+        self.action_B_data: list[ExperimentData] = [] 
+        self.private_B_data: list[ExperimentData] = []
         self.round_action = "" # "A" or "B"
 
     def __str__(self):
@@ -23,18 +25,17 @@ class Agent:
 
     def experiment_A(self, n):
         self.round_action = "A"
-        self.action_A_data.k += random.binomial(n, .5)
-        self.action_A_data.n += n
+        k = random.binomial(n, .5)
+        self.action_A_data.append(ExperimentData(k, n))
 
     def experiment_B(self, n, p):
         self.round_action = "B"
-        self.action_B_data.k += random.binomial(n, p)
-        self.action_B_data.n += n
+        k = random.binomial(n, p)
+        self.action_B_data.append(ExperimentData(k, n))
 
     def burn_in(self, n, p):
-        self.private_B_data.k += random.binomial(n, p)
-        self.private_B_data.n += n
+        k = random.binomial(n, p)
+        self.private_B_data.append(ExperimentData(k, n))
 
     def expectation_B_update(self, k, n):
         self.expectation_B = (k + 1) / (n + 2)
-        

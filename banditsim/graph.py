@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 
 from . import metrics
@@ -41,13 +42,13 @@ class Graph:
     def __str__(self):
         return "\n" + "\n".join([str(a) for a in self.agents])
 
-    def run_simulation(self, n: int, burn_in: int):
+    def run_simulation(self, n: int, burn_in: int, window_s: int):
         self.run_burn_in(n, burn_in, .5 + self.max_epsilon)
 
         ## TODO: Verify that this runs *exactly* the number of times we want
         while self.epoch < self.max_epochs:
             self.run_experiments(n, self.epoch)
-            self.expectation_update_agents()
+            self.expectation_update_agents(window_s)
             self.epoch += 1
  
         self.metrics.record_sim_end_metrics(self, n)
@@ -65,16 +66,21 @@ class Graph:
         for a in self.agents:
             a.decide_experiment(n, p)
         
-    def expectation_update_agents(self):
+    def expectation_update_agents(self, window_s: Optional[int]):
         for a in self.agents:
             total_k, total_n = 0, 0
-            for neighbor in self.graph[a]:
-                # includes agent's own public data (every agent is their own neighbor)
-                total_k += neighbor.action_B_data.k
-                total_n += neighbor.action_B_data.n
+            for neighbor in self.graph[a]: # Note: everyone is their own neighbor as well
+                if window_s:
+                    B_data = neighbor.action_B_data[-window_s:]
+                else: 
+                    B_data = neighbor.action_B_data
+                k = sum([exp.k for exp in B_data])
+                n = sum([exp.n for exp in B_data])
+                total_k += k
+                total_n += n
             # add burn-in data
-            total_k += a.private_B_data.k
-            total_n += a.private_B_data.n
+            total_k += sum([exp.k for exp in a.private_B_data])
+            total_n += sum([exp.n for exp in a.private_B_data])
             if total_n > 0:
                 a.expectation_B_update(total_k, total_n)
     

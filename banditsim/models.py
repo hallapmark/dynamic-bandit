@@ -1,6 +1,6 @@
 ## RESULTS
 from enum import Enum, auto
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 class GraphShape(Enum):
     COMPLETE = auto()
@@ -16,6 +16,7 @@ class SimResults(NamedTuple):
     max_epsilon: float
     sine_period: int
     burn_in: int
+    window_s: Optional[int]
 
     # Outcome
     epochs: int
@@ -31,6 +32,7 @@ class AnalyzedResults(NamedTuple):
     max_epsilon: float
     sine_period: int
     burn_in: int
+    window_s: Optional[int]
 
     # Results over all sims
     av_utility: float

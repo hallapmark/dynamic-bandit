@@ -107,7 +107,12 @@ class SimMetrics:
         g: graph.Graph = g
         # each win/success k of the n pulls, has a util of "1"
         # We sum up the utils from action A and B to get the total util agents managed to pull
-        tot_utility = sum([a.action_A_data.k for a in g.agents] + [a.action_B_data.k for a in g.agents])
+        #tot_utility = sum([a.action_A_data.k for a in g.agents] + [a.action_B_data.k for a in g.agents])
+        tot_utility = 0
+        for a in g.agents:
+            tot_utility += sum(exp.k for exp in a.action_A_data)
+            tot_utility += sum(exp.k for exp in a.action_B_data)
+
         # Av utility per round per agent per trial
         self.sim_average_utility = (tot_utility / len(g.agents)) / g.epoch / trials
         
