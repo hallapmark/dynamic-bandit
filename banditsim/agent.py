@@ -39,3 +39,7 @@ class Agent:
 
     def expectation_B_update(self, k, n):
         self.expectation_B = (k + 1) / (n + 2)
+
+class BFanAgent(Agent):
+    def decide_experiment(self, n, p):
+        self.experiment_B(n, p)

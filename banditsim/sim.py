@@ -10,10 +10,10 @@ from plot import PlotSine
 def process(grid, path):
     for params in grid:
         print(params)
-        n_simulations, graph, a, n, max_epsilon, sine_period, max_epochs, burn_in, window_s = params
+        n_simulations, graph, a, n, max_epsilon, sine_period, max_epochs, burn_in, B_fans, window_s = params
         pool = Pool()
         results = pool.starmap(
-            run_simulation, ((graph, a, n, max_epsilon, sine_period, max_epochs, burn_in, window_s),) * n_simulations)
+            run_simulation, ((graph, a, n, max_epsilon, sine_period, max_epochs, burn_in, B_fans, window_s),) * n_simulations)
         pool.close()
         pool.join()
         # for _ in range(n_simulations):
@@ -23,12 +23,12 @@ def process(grid, path):
         record_data_dump(results, pathname + '_datadump' + extension)
         record_analysis(analyzed_results(results), path)
 
-def run_simulation(graph, a, n, max_epsilon, sine_period, max_epochs, burn_in, window_s):
-    g = Graph(a, graph, max_epochs, max_epsilon, sine_period)
+def run_simulation(graph, a, n, max_epsilon, sine_period, max_epochs, burn_in, B_fans, window_s):
+    g = Graph(a, graph, max_epochs, max_epsilon, sine_period, B_fans)
     g.run_simulation(n, burn_in, window_s)
     # plotsine = PlotSine(g.max_epochs, g.epsilons, g.metrics.average_expectations) # Uncomment to draw plot
     # plotsine.makePlot() # Currently plot can only be drawn if multiprocessing is disabled above
-    return SimResults(graph, a, max_epochs, n, max_epsilon, sine_period, burn_in, window_s, g.epoch,
+    return SimResults(graph, a, max_epochs, n, max_epsilon, sine_period, burn_in, B_fans, window_s, g.epoch,
                       g.metrics.sim_average_utility)
 
 def record_data_dump(simresults: list[SimResults], path):
@@ -52,4 +52,4 @@ def analyzed_results(simresults: list[SimResults]):
     av_utility = round(np.mean([res.av_utility for res in simresults]), 7)
     sim = simresults[0] # grab metadata/params
     return AnalyzedResults(sim.graph_shape, sim.agents, sim.max_epochs, sim.trials, sim.max_epsilon,
-                           sim.sine_period, sim.burn_in, sim.window_s, av_utility)
+                           sim.sine_period, sim.burn_in, sim.B_fans, sim.window_s, av_utility)

@@ -9,10 +9,11 @@ if __name__ == '__main__':
     s = 10000
     max_epochs = 8000
 
-    grid = [(s, GraphShape.COMPLETE, a, 50, .2, sine_period, max_epochs, burn_in, window_s)
+    grid = [(s, GraphShape.COMPLETE, a, 50, .2, sine_period, max_epochs, burn_in, B_fans, window_s)
                                                                 for a in (20,) # 4, 12
                                                                 for burn_in in (1,)
                                                                 for sine_period in (1000,)
+                                                                for B_fans in (0,1,)
                                                                 for window_s in (None, 100,)]
     
     # grid += [(s, GraphShape.CYCLE, a, 50, .2, sine_period, max_epochs, burn_in, window_s)

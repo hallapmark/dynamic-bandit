@@ -64,7 +64,7 @@ class SimMetrics:
         if not a_list:
             return
         
-        i = 1
+        i = max(1, g.n_B_fans)
         if all(a == "A" for a in a_list):
             #print(f"Whole network took action 'A' in round {g.epoch}")
             self.n_rounds_all_took_A += 1

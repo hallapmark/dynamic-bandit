@@ -16,12 +16,13 @@ class SimResults(NamedTuple):
     max_epsilon: float
     sine_period: int
     burn_in: int
+    B_fans: int
     window_s: Optional[int]
-
+    
     # Outcome
     epochs: int
     av_utility: float # per agent per round per trial
-
+    
 class AnalyzedResults(NamedTuple):
     ## Analyzed results – includes averages over e.g. 5000 runs of sims of a given configuration
     # Config
@@ -32,6 +33,7 @@ class AnalyzedResults(NamedTuple):
     max_epsilon: float
     sine_period: int
     burn_in: int
+    B_fans: int
     window_s: Optional[int]
 
     # Results over all sims
