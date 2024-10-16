@@ -3,7 +3,7 @@ import numpy as np
 
 from . import metrics
 from banditsim.agent import *
-from banditsim.models import GraphShape
+from banditsim.models import AdmitteeType, GraphShape
 
 class Graph:
     def __init__(self, 
@@ -65,11 +65,19 @@ class Graph:
 
         ## TODO: Verify that this runs *exactly* the number of times we want
         while self.epoch < self.max_epochs:
-            self.run_experiments(n, self.epoch)
-            self.expectation_update_agents(window_s)
-            self.epoch += 1
- 
+            self._play_round(n, window_s)
+            
         self.metrics.record_sim_end_metrics(self, n)
+
+    def _play_round(self, n: int, window_s: int):
+        # if self.epoch % 1000 == 0:
+        #     print(f"A sim reached {self.epoch}")
+        self._standard_round_actions(n, window_s)
+    
+    def _standard_round_actions(self, n: int, window_s: int):
+        self.run_experiments(n, self.epoch)
+        self.expectation_update_agents(window_s)
+        self.epoch += 1
 
     def run_burn_in(self, n, burn_in, p):
         burn_in_round = 0
@@ -107,4 +115,41 @@ class Graph:
         fluctuating between max_epsilon and -max_epsilon in amplitude."""
         b = 2 * np.pi  / period
         return max_epsilon * np.sin(b * (t + period / 4))
+
+class LifecycleGraph(Graph):
+    def __init__(self, 
+                 a: int, 
+                 shape: GraphShape, 
+                 max_epochs: int, 
+                 max_epsilon: float, 
+                 epsilon_sine_period: float,
+                 n_B_fans: int,
+                 admittee_type: AdmitteeType):
+        super().__init__(a, shape, max_epochs, max_epsilon, epsilon_sine_period, n_B_fans)
+        self.admittee_type = admittee_type
+        if not n_B_fans == 0:
+            raise NotImplementedError("BFans not implemented for lifecycle networks.")
         
+    def _play_round(self, n: int, window_s: int):
+        self._standard_round_actions(n, window_s)
+        if self.epoch % 10 == 0:
+            self._retire_someone(self.admittee_type)
+        
+    def _retire_someone(self, admitteetype: AdmitteeType):
+        eligible = [a for a in self.agents if a.age >= 20]
+        if not eligible: 
+            return
+        
+        retiree = np.random.choice(eligible)
+        if not retiree:
+            raise ValueError("We should not reach this. No retiree agent found.")
+        existing_av = np.mean([a.expectation_B for a in self.agents]) 
+        # TODO: properly this should be average of all agents NOT the retiree. 
+        # (But the difference should be negligible)
+        retiree.__init__() # re-initialize retiree to new agent
+        match admitteetype:
+            case AdmitteeType.CONFORMIST:
+                retiree.expectation_B = existing_av
+                # TODO: Do we want to have burn_in for newcomers???
+            case AdmitteeType.NONCONFORMIST:
+                retiree.expectation_B = np.random.uniform(0,1)

@@ -6,6 +6,10 @@ class GraphShape(Enum):
     COMPLETE = auto()
     CYCLE = auto()
 
+class AdmitteeType(Enum):
+    NONCONFORMIST = auto() # Enter with random[??] belief/expectation for B
+    CONFORMIST = auto() # Conform to existing network's average expectation
+    #BFAN = auto() # Dogmatically prefer B
 class SimResults(NamedTuple):
     ## Results for a given sim
     # Config
@@ -18,6 +22,8 @@ class SimResults(NamedTuple):
     burn_in: int
     B_fans: int
     window_s: Optional[int]
+    lifecycle: bool
+    admitteetype: AdmitteeType
     
     # Outcome
     epochs: int
@@ -35,6 +41,8 @@ class AnalyzedResults(NamedTuple):
     burn_in: int
     B_fans: int
     window_s: Optional[int]
+    lifecycle: bool
+    admitteetype: AdmitteeType
 
     # Results over all sims
     av_utility: float

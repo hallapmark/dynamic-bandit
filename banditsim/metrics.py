@@ -27,6 +27,7 @@ class SimMetrics:
     ## Sim-end summaries
     sim_proportion_correct_action = None
     # sim_average_expectation = None
+    sim_total_utility = 0
     sim_average_utility = None
 
     def record_sim_end_metrics(self, g, trials):
@@ -39,9 +40,12 @@ class SimMetrics:
         # print(f'n_rounds_mixed_actions: {self.n_rounds_supermajority_took_B}')
 
     def record_round_metrics(self, g):
+        g: graph.Graph = g
         self.record_round_correct_actions(g)
         self.record_round_taken_actions(g)
-        self.record_round_average_expectation(g)
+        self.record_round_util(g)
+    
+        # self.record_round_average_expectation(g)
     
     def record_round_correct_actions(self, g):
         g: graph.Graph = g
@@ -55,9 +59,18 @@ class SimMetrics:
         self.taken_actions.append(a_list)
         self.record_network_action_state(g, a_list)
 
-    def record_round_average_expectation(self, g):
+    # def record_round_average_expectation(self, g):
+    #     g: graph.Graph = g
+    #     self.average_expectations.append(np.average([a.expectation_B for a in g.agents]))
+
+    def record_round_util(self, g):
         g: graph.Graph = g
-        self.average_expectations.append(np.average([a.expectation_B for a in g.agents]))
+        # each win/success k of the n pulls, has a util of "1"
+        # We sum up the utils from action A and B to get the total util agents managed to pull
+        self.sim_total_utility += sum(
+            [a.action_A_data[-1].k for a in g.agents if a.action_A_data and a.round_action == "A"])
+        self.sim_total_utility += sum(
+            [a.action_B_data[-1].k for a in g.agents if a.action_B_data and a.round_action == "B"])
 
     def record_network_action_state(self, g, a_list: list):
         g: graph.Graph = g
@@ -105,14 +118,6 @@ class SimMetrics:
     
     def record_sim_average_utility(self, g, trials):
         g: graph.Graph = g
-        # each win/success k of the n pulls, has a util of "1"
-        # We sum up the utils from action A and B to get the total util agents managed to pull
-        #tot_utility = sum([a.action_A_data.k for a in g.agents] + [a.action_B_data.k for a in g.agents])
-        tot_utility = 0
-        for a in g.agents:
-            tot_utility += sum(exp.k for exp in a.action_A_data)
-            tot_utility += sum(exp.k for exp in a.action_B_data)
-
         # Av utility per round per agent per trial
-        self.sim_average_utility = (tot_utility / len(g.agents)) / g.epoch / trials
+        self.sim_average_utility = (self.sim_total_utility / len(g.agents)) / g.epoch / trials
         

@@ -13,11 +13,13 @@ class Agent:
         self.action_B_data: list[ExperimentData] = [] 
         self.private_B_data: list[ExperimentData] = []
         self.round_action = "" # "A" or "B"
+        self.age = 0
 
     def __str__(self):
         return f"expectation = {round(self.expectation_B, 2)}, k = {self.action_B_data.k}, n = {self.action_B_data.n}"
     
     def decide_experiment(self, n, p):
+        self.age += 1 
         if self.expectation_B >= .5:
             self.experiment_B(n, p)
         else:

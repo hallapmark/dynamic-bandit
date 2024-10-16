@@ -1,7 +1,7 @@
 import timeit
 from multiprocessing import freeze_support
 
-from banditsim.models import GraphShape
+from banditsim.models import AdmitteeType, GraphShape
 from banditsim.sim import process
 
 if __name__ == '__main__':
@@ -9,12 +9,15 @@ if __name__ == '__main__':
     s = 10000
     max_epochs = 8000
 
-    grid = [(s, GraphShape.COMPLETE, a, 50, .2, sine_period, max_epochs, burn_in, B_fans, window_s)
+    grid = [(s, GraphShape.COMPLETE, a, 50, .2, sine_period, max_epochs, burn_in, 
+             B_fans, window_s, lifecycle, admitteetype)
                                                                 for a in (20,) # 4, 12
                                                                 for burn_in in (1,)
                                                                 for sine_period in (1000,)
-                                                                for B_fans in (0,1,)
-                                                                for window_s in (None, 100,)]
+                                                                for B_fans in (0,)
+                                                                for window_s in (100,)
+                                                                for lifecycle in (True,)
+                                                                for admitteetype in (AdmitteeType.CONFORMIST,AdmitteeType.NONCONFORMIST)]
     
     # grid += [(s, GraphShape.CYCLE, a, 50, .2, sine_period, max_epochs, burn_in, window_s)
     #                                                             for a in (20,) # 4, 12
@@ -24,7 +27,7 @@ if __name__ == '__main__':
 
 
     tic = timeit.default_timer()
-    process(grid, 'results/window100_and_none.csv')
+    process(grid, 'results/lifecycle.csv')
     toc = timeit.default_timer()
 
     print("Time: " + str(round(toc - tic, 1)))
