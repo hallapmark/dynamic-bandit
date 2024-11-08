@@ -11,17 +11,13 @@ class Graph:
                  shape: GraphShape, 
                  max_epochs: int, 
                  max_epsilon: float, 
-                 epsilon_sine_period: float,
-                 n_B_fans: int):
+                 epsilon_sine_period: float):
         np.random.seed()
         self.agents = [Agent() for _ in range(a)]
         self.graph: dict[Agent, list[Agent]] = dict()
         self._epoch = 0
         
         ## Config
-        self.n_B_fans = n_B_fans
-        if n_B_fans > 0:
-            self._add_B_fan_agents(n_B_fans)
         self.max_epochs = max_epochs
         self.max_epsilon = max_epsilon
         t = np.arange(0, self.max_epochs, 1)
@@ -50,15 +46,6 @@ class Graph:
     
     def __str__(self):
         return "\n" + "\n".join([str(a) for a in self.agents])
-    
-    def _add_B_fan_agents(self, n_B_fans):
-        # We keep the total network size the same if B_fans are present
-        for _ in range(n_B_fans):
-            indices: np.ndarray = np.arange(len(self.agents))
-            self.agents.pop(np.random.choice(indices))
-        for _ in range(n_B_fans):
-            indices: np.ndarray = np.arange(len(self.agents))
-            self.agents.insert(np.random.choice(indices), BFanAgent())
 
     def run_simulation(self, n: int, burn_in: int, window_s: int):
         self.run_burn_in(n, burn_in, .5 + self.max_epsilon)
@@ -123,12 +110,9 @@ class LifecycleGraph(Graph):
                  max_epochs: int, 
                  max_epsilon: float, 
                  epsilon_sine_period: float,
-                 n_B_fans: int,
                  admittee_type: AdmitteeType):
-        super().__init__(a, shape, max_epochs, max_epsilon, epsilon_sine_period, n_B_fans)
+        super().__init__(a, shape, max_epochs, max_epsilon, epsilon_sine_period)
         self.admittee_type = admittee_type
-        if not n_B_fans == 0:
-            raise NotImplementedError("BFans not implemented for lifecycle networks.")
         
     def _play_round(self, n: int, window_s: int):
         self._standard_round_actions(n, window_s)

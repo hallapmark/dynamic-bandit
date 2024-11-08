@@ -6,28 +6,31 @@ from banditsim.sim import process
 
 if __name__ == '__main__':
     freeze_support()
-    s = 10000
-    max_epochs = 8000
+    n_simulations = 500
+    max_epochs = 6000
 
-    grid = [(s, GraphShape.COMPLETE, a, 50, .2, sine_period, max_epochs, burn_in, 
-             B_fans, window_s, lifecycle, admitteetype)
-                                                                for a in (20,) # 4, 12
-                                                                for burn_in in (1,)
+    grid = [(n_simulations, GraphShape.COMPLETE, a, 50, max_epsilon, sine_period, max_epochs, burn_in, 
+             window_s, lifecycle, admitteetype)
+                                                                for a in (10,) # 4, 12
+                                                                for max_epsilon in (.1,)
                                                                 for sine_period in (1000,)
-                                                                for B_fans in (0,)
-                                                                for window_s in (100,)
-                                                                for lifecycle in (True,)
-                                                                for admitteetype in (AdmitteeType.CONFORMIST,AdmitteeType.NONCONFORMIST)]
+                                                                for burn_in in (1,)
+                                                                for window_s in (None,) # 50, 100
+                                                                for lifecycle in (False,)
+                                                                for admitteetype in (None,)]
     
-    # grid += [(s, GraphShape.CYCLE, a, 50, .2, sine_period, max_epochs, burn_in, window_s)
-    #                                                             for a in (20,) # 4, 12
-    #                                                             for burn_in in (1,)
-    #                                                             for sine_period in (1000,)
-    #                                                             for window_s in (None, 100,)]
-
+    grid += [(n_simulations, GraphShape.CYCLE, a, 50, max_epsilon, sine_period, max_epochs, burn_in, 
+             window_s, lifecycle, admitteetype)
+                                                                for a in (10,) # 4, 12
+                                                                for max_epsilon in (.1,)
+                                                                for sine_period in (1000,)
+                                                                for burn_in in (1,)
+                                                                for window_s in (None,)
+                                                                for lifecycle in (False,)
+                                                                for admitteetype in (None,)]
 
     tic = timeit.default_timer()
-    process(grid, 'results/lifecycle.csv')
+    process(grid, 'results/test.csv')
     toc = timeit.default_timer()
 
     print("Time: " + str(round(toc - tic, 1)))
