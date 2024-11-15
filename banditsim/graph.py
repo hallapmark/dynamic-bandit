@@ -83,12 +83,7 @@ class Graph:
     def update_expectation(self, a: Agent, window_s: Optional[int]):
         total_k, total_n = 0, 0
         for neighbor in self.graph[a]: # Note: everyone is their own neighbor as well
-            if window_s:
-                B_data = neighbor.action_B_data[-window_s:]
-            else: 
-                B_data = neighbor.action_B_data
-            k = sum([exp.k for exp in B_data])
-            n = sum([exp.n for exp in B_data])
+            k, n = neighbor.report_exp_B_data(window_s)
             total_k += k
             total_n += n
         # add burn-in data
@@ -96,7 +91,7 @@ class Graph:
         total_n += sum([exp.n for exp in a.private_B_data])
         if total_n > 0:
             a.expectation_B_update(total_k, total_n)
-    
+            
     def build_sine_deltas(self, sine_amp: float, t: np.ndarray, period: int):
         """ Returns a numpy array of deltas (floats) shaped like a sine wave
         fluctuating between sine_amp and -sine_amp."""

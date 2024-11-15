@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 from numpy import random
 
 @dataclass
@@ -41,3 +42,13 @@ class Agent:
 
     def expectation_B_update(self, k, n):
         self.expectation_B = (k + 1) / (n + 2)
+    
+    def report_exp_B_data(self, window_s: Optional[int]):
+        if window_s:
+            B_data = self.action_B_data[-window_s:]
+        else: 
+            B_data = self.action_B_data
+        k = sum([exp.k for exp in B_data])
+        n = sum([exp.n for exp in B_data])
+        return k, n
+    
