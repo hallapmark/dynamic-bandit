@@ -110,6 +110,7 @@ class LifecycleGraph(Graph):
                  window_s: Optional[int],
                  admittee_type: AdmitteeType):
         super().__init__(a, shape, max_epochs, sine_amp, sine_period, window_s)
+        raise NotImplementedError("k and n storage logic needs to be changed for licecycle networks")
         self.admittee_type = admittee_type
         
     def _play_round(self, n: int, window_s: int):

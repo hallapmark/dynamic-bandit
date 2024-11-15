@@ -27,11 +27,6 @@ def process(grid, path):
 def run_simulation(graph, a, n, sine_amp, sine_period, max_epochs, burn_in, window_s, lifecycle, admitteetype):
     if lifecycle:
         g = LifecycleGraph(a, graph, max_epochs, sine_amp, sine_period, window_s, admitteetype)
-        # TODO: Right now new agents only consider data from current network members
-        # But they take all the data those members have, including historical data.
-        # So two combinations are not accounted for in this model:
-        # New agents update on all historical data.
-        # And new agents update only on completely new data.
         g.run_simulation(n, burn_in)
     else:
         g = Graph(a, graph, max_epochs, sine_amp, sine_period, window_s)
