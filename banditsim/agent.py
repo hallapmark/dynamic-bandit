@@ -8,47 +8,70 @@ class ExperimentData:
     n: int = 0
 
 class Agent:
-    def __init__(self):
+    def __init__(self, keep_round_records: bool):
         self.expectation_B = random.uniform(0, 1)
-        self.action_A_data: list[ExperimentData] = [] # Each element is one round's experiment data
-        self.action_B_data: list[ExperimentData] = [] 
-        self.private_B_data: list[ExperimentData] = []
+        self.keep_round_records = keep_round_records
+
+        # All-time k, n
+        self._A_data_total = ExperimentData(0, 0)
+        self._B_data_total = ExperimentData(0, 0)
+        self.private_B_data = ExperimentData(0, 0)
+
+        # Round-by-round records of trials
+        self._A_round_by_round_data: list[ExperimentData] = [] # Each element is one round's experiment data
+        self._B_round_by_round_data: list[ExperimentData] = [] 
+
         self.round_action = "" # "A" or "B"
         self.age = 0
 
     def __str__(self):
-        return f"expectation = {round(self.expectation_B, 2)}, k = {self.action_B_data.k}, n = {self.action_B_data.n}"
+        return (f"expectation = {round(self.expectation_B, 2)}, " 
+                f"k = {self._B_data_total.k}, n = {self._B_data_total.n}, "
+                f"burn_in k: {self.private_B_data.k}, burn_in n: {self.private_B_data.n}")
     
-    def decide_experiment(self, n, p):
+    def experiment(self, n, p):
+        """ Experiment. Returns k (number of successes this round)"""
         self.age += 1 
-        if self.expectation_B >= .5:
-            self.experiment_B(n, p)
+        if self.expectation_B >= .5: # MYOPIC/max-exploit rule, tie broken in favor of B
+            return self.experiment_B(n, p)
         else:
-            self.experiment_A(n)
+            return self.experiment_A(n)
 
-    def experiment_A(self, n):
+    def experiment_A(self, n) -> int:
+        """ Experiment with A. Returns k (number of successes this round)"""
         self.round_action = "A"
         k = random.binomial(n, .5)
-        self.action_A_data.append(ExperimentData(k, n))
+        self._A_data_total = ExperimentData(self._A_data_total.k + k, self._A_data_total.n + n)
+        if self.keep_round_records:
+            self._A_round_by_round_data.append(ExperimentData(k, n))
+        return k
 
-    def experiment_B(self, n, p):
+    def experiment_B(self, n, p) -> int:
+        """ Experiment with B. Returns k (number of successes this round)"""
         self.round_action = "B"
         k = random.binomial(n, p)
-        self.action_B_data.append(ExperimentData(k, n))
-
+        self._B_data_total = ExperimentData(self._B_data_total.k + k, self._B_data_total.n + n)
+        if self.keep_round_records:
+            self._B_round_by_round_data.append(ExperimentData(k, n))
+        return k
+                 
     def burn_in(self, n, p):
         k = random.binomial(n, p)
-        self.private_B_data.append(ExperimentData(k, n))
+        self.private_B_data = ExperimentData(self.private_B_data.k + k, self.private_B_data.n + n)
 
     def expectation_B_update(self, k, n):
         self.expectation_B = (k + 1) / (n + 2)
-    
+        
     def report_exp_B_data(self, window_s: Optional[int]):
+        """ Reports all-time experiment B_data or within a window size as requested."""
         if window_s:
-            B_data = self.action_B_data[-window_s:]
-        else: 
-            B_data = self.action_B_data
-        k = sum([exp.k for exp in B_data])
-        n = sum([exp.n for exp in B_data])
-        return k, n
-    
+            if not self.keep_round_records:
+                raise ValueError("Window-sized experiment data requested but round records not kept.")
+            B_data = self._B_round_by_round_data[-window_s:]
+            k = sum([exp.k for exp in B_data])
+            n = sum([exp.n for exp in B_data])
+            return k, n
+        else:
+            B_data = self._B_data_total
+            return B_data.k, B_data.n
+        

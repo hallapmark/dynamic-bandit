@@ -43,8 +43,6 @@ class SimMetrics:
         g: graph.Graph = g
         self.record_round_correct_actions(g)
         self.record_round_taken_actions(g)
-        self.record_round_util(g)
-    
         self.record_round_average_expectation(g)
     
     def record_round_correct_actions(self, g):
@@ -62,15 +60,6 @@ class SimMetrics:
     def record_round_average_expectation(self, g):
         g: graph.Graph = g
         self.average_expectations.append(np.average([a.expectation_B for a in g.agents]))
-
-    def record_round_util(self, g):
-        g: graph.Graph = g
-        # each win/success k of the n pulls, has a util of "1"
-        # We sum up the utils from action A and B to get the total util agents managed to pull
-        self.sim_total_utility += sum(
-            [a.action_A_data[-1].k for a in g.agents if a.action_A_data and a.round_action == "A"])
-        self.sim_total_utility += sum(
-            [a.action_B_data[-1].k for a in g.agents if a.action_B_data and a.round_action == "B"])
 
     def record_network_action_state(self, g, a_list: list):
         g: graph.Graph = g

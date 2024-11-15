@@ -11,11 +11,13 @@ class Graph:
                  shape: GraphShape, 
                  max_epochs: int, 
                  sine_amp: float, 
-                 sine_period: float):
+                 sine_period: float,
+                 window_s: Optional[int]):
         np.random.seed()
-        self.agents = [Agent() for _ in range(a)]
+        self.agents = [Agent(window_s is not None) for _ in range(a)]
         self.graph: dict[Agent, list[Agent]] = dict()
         self._epoch = 0
+        self.window_s = window_s
         
         ## Config
         self.max_epochs = max_epochs
@@ -47,12 +49,12 @@ class Graph:
     def __str__(self):
         return "\n" + "\n".join([str(a) for a in self.agents])
 
-    def run_simulation(self, n: int, burn_in: int, window_s: Optional[int]):
+    def run_simulation(self, n: int, burn_in: int):
         self.run_burn_in(n, burn_in, .5 + self.sine_amp)
 
         ## TODO: Verify that this runs *exactly* the number of times we want
         while self.epoch < self.max_epochs:
-            self._play_round(n, window_s)
+            self._play_round(n, self.window_s)
             
         self.metrics.record_sim_end_metrics(self, n)
 
@@ -78,7 +80,7 @@ class Graph:
         d = self.sine_deltas[epoch]
         p = 0.5 + d
         for a in self.agents:
-            a.decide_experiment(n, p)
+            self.metrics.sim_total_utility += a.experiment(n, p)
     
     def update_expectation(self, a: Agent, window_s: Optional[int]):
         total_k, total_n = 0, 0
@@ -87,8 +89,8 @@ class Graph:
             total_k += k
             total_n += n
         # add burn-in data
-        total_k += sum([exp.k for exp in a.private_B_data])
-        total_n += sum([exp.n for exp in a.private_B_data])
+        total_k += a.private_B_data.k
+        total_n += a.private_B_data.n
         if total_n > 0:
             a.expectation_B_update(total_k, total_n)
             
@@ -105,8 +107,9 @@ class LifecycleGraph(Graph):
                  max_epochs: int, 
                  sine_amp: float, 
                  sine_period: float,
+                 window_s: Optional[int],
                  admittee_type: AdmitteeType):
-        super().__init__(a, shape, max_epochs, sine_amp, sine_period)
+        super().__init__(a, shape, max_epochs, sine_amp, sine_period, window_s)
         self.admittee_type = admittee_type
         
     def _play_round(self, n: int, window_s: int):
@@ -119,13 +122,13 @@ class LifecycleGraph(Graph):
         if not eligible: 
             return
         
-        retiree = np.random.choice(eligible)
+        retiree: Agent = np.random.choice(eligible)
         if not retiree:
             raise ValueError("We should not reach this. No retiree agent found.")
         existing_av = np.mean([a.expectation_B for a in self.agents]) 
         # TODO: properly this should be average of all agents NOT the retiree. 
         # (But the difference should be negligible)
-        retiree.__init__() # re-initialize retiree to new agent
+        retiree.__init__(self.window_s is not None) # re-initialize retiree to new agent
         match admitteetype:
             case AdmitteeType.CONFORMIST:
                 retiree.expectation_B = existing_av

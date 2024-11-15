@@ -26,14 +26,19 @@ def process(grid, path):
 
 def run_simulation(graph, a, n, sine_amp, sine_period, max_epochs, burn_in, window_s, lifecycle, admitteetype):
     if lifecycle:
-        g = LifecycleGraph(a, graph, max_epochs, sine_amp, sine_period, admitteetype)
-        g.run_simulation(n, burn_in, window_s)
+        g = LifecycleGraph(a, graph, max_epochs, sine_amp, sine_period, window_s, admitteetype)
+        # TODO: Right now new agents only consider data from current network members
+        # But they take all the data those members have, including historical data.
+        # So two combinations are not accounted for in this model:
+        # New agents update on all historical data.
+        # And new agents update only on completely new data.
+        g.run_simulation(n, burn_in)
     else:
-        g = Graph(a, graph, max_epochs, sine_amp, sine_period)
-        g.run_simulation(n, burn_in, window_s)
-    #plotsine = PlotSine(g.max_epochs, g.sine_deltas) # Uncomment to draw plot
-    #plotsine.plot_fig1_AB_ob_chance_of_payoff() # Currently plot can only be drawn if multiprocessing is disabled above
-    #plotsine.plot_fig2_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations)
+        g = Graph(a, graph, max_epochs, sine_amp, sine_period, window_s)
+        g.run_simulation(n, burn_in)
+    # plotsine = PlotSine(g.max_epochs, g.sine_deltas) # Uncomment to draw plot
+    # plotsine.plot_fig1_AB_ob_chance_of_payoff() # Currently plot can only be drawn if multiprocessing is disabled above
+    # plotsine.plot_fig2_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations)
     return SimResults(graph_shape=graph, agents=a, max_epochs=max_epochs, trials=n, sine_amp=sine_amp, 
                       sine_period=sine_period, burn_in=burn_in, window_s=window_s, lifecycle=lifecycle, 
                       admitteetype=admitteetype, epochs=g.epoch, av_utility=g.metrics.sim_average_utility)
