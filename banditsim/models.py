@@ -9,6 +9,7 @@ class GraphShape(Enum):
 class AdmitteeType(Enum):
     NONCONFORMIST = auto() # Enter with random[??] belief/expectation for B
     CONFORMIST = auto() # Conform to existing network's average expectation
+    
 class SimResults(NamedTuple):
     ## Results for a given sim
     # Config

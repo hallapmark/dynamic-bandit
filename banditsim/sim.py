@@ -5,7 +5,7 @@ import numpy as np
 
 from banditsim.graph import Graph, LifecycleGraph
 from banditsim.models import AdmitteeType, AnalyzedResults, SimResults
-from plot import PlotSine
+from plot_graphs import PlotSine
 
 def process(grid, path):
     for params in grid:
@@ -31,8 +31,9 @@ def run_simulation(graph, a, n, max_epsilon, sine_period, max_epochs, burn_in, w
     else:
         g = Graph(a, graph, max_epochs, max_epsilon, sine_period)
         g.run_simulation(n, burn_in, window_s)
-    # plotsine = PlotSine(g.max_epochs, g.epsilons, g.metrics.average_expectations) # Uncomment to draw plot
-    # plotsine.makePlot() # Currently plot can only be drawn if multiprocessing is disabled above
+    #plotsine = PlotSine(g.max_epochs, g.epsilons) # Uncomment to draw plot
+    #plotsine.plot_fig1_AB_ob_chance_of_payoff() # Currently plot can only be drawn if multiprocessing is disabled above
+    #plotsine.plot_fig2_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations)
     return SimResults(graph_shape=graph, agents=a, max_epochs=max_epochs, trials=n, max_epsilon=max_epsilon, 
                       sine_period=sine_period, burn_in=burn_in, window_s=window_s, lifecycle=lifecycle, 
                       admitteetype=admitteetype, epochs=g.epoch, av_utility=g.metrics.sim_average_utility)
