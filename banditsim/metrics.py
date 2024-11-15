@@ -45,7 +45,7 @@ class SimMetrics:
         self.record_round_taken_actions(g)
         self.record_round_util(g)
     
-        # self.record_round_average_expectation(g)
+        self.record_round_average_expectation(g)
     
     def record_round_correct_actions(self, g):
         g: graph.Graph = g
@@ -59,9 +59,9 @@ class SimMetrics:
         self.taken_actions.append(a_list)
         self.record_network_action_state(g, a_list)
 
-    # def record_round_average_expectation(self, g):
-    #     g: graph.Graph = g
-    #     self.average_expectations.append(np.average([a.expectation_B for a in g.agents]))
+    def record_round_average_expectation(self, g):
+        g: graph.Graph = g
+        self.average_expectations.append(np.average([a.expectation_B for a in g.agents]))
 
     def record_round_util(self, g):
         g: graph.Graph = g
