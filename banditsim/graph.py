@@ -10,8 +10,8 @@ class Graph:
                  a: int, 
                  shape: GraphShape, 
                  max_epochs: int, 
-                 max_epsilon: float, 
-                 epsilon_sine_period: float):
+                 sine_amp: float, 
+                 sine_period: float):
         np.random.seed()
         self.agents = [Agent() for _ in range(a)]
         self.graph: dict[Agent, list[Agent]] = dict()
@@ -19,9 +19,9 @@ class Graph:
         
         ## Config
         self.max_epochs = max_epochs
-        self.max_epsilon = max_epsilon
+        self.sine_amp = sine_amp
         t = np.arange(0, self.max_epochs, 1)
-        self.epsilons = self.sine_epsilons(max_epsilon, t, epsilon_sine_period)
+        self.sine_deltas = self.build_sine_deltas(sine_amp, t, sine_period)
 
         ## Outcome
         self.metrics = metrics.SimMetrics()
@@ -48,7 +48,7 @@ class Graph:
         return "\n" + "\n".join([str(a) for a in self.agents])
 
     def run_simulation(self, n: int, burn_in: int, window_s: int):
-        self.run_burn_in(n, burn_in, .5 + self.max_epsilon)
+        self.run_burn_in(n, burn_in, .5 + self.sine_amp)
 
         ## TODO: Verify that this runs *exactly* the number of times we want
         while self.epoch < self.max_epochs:
@@ -74,8 +74,8 @@ class Graph:
                 a.burn_in(n, p)
 
     def run_experiments(self, n, epoch):
-        e = self.epsilons[epoch]
-        p = 0.5 + e
+        d = self.sine_deltas[epoch]
+        p = 0.5 + d
         for a in self.agents:
             a.decide_experiment(n, p)
         
@@ -97,21 +97,21 @@ class Graph:
             if total_n > 0:
                 a.expectation_B_update(total_k, total_n)
     
-    def sine_epsilons(self, max_epsilon: float, t: np.ndarray, period: int):
-        """ Returns a numpy array of epsilons (floats) shaped like a sine wave
-        fluctuating between max_epsilon and -max_epsilon in amplitude."""
+    def build_sine_deltas(self, sine_amp: float, t: np.ndarray, period: int):
+        """ Returns a numpy array of deltas (floats) shaped like a sine wave
+        fluctuating between sine_amp and -sine_amp."""
         b = 2 * np.pi  / period
-        return max_epsilon * np.sin(b * (t + period / 4))
+        return sine_amp * np.sin(b * (t + period / 4))
 
 class LifecycleGraph(Graph):
     def __init__(self, 
                  a: int, 
                  shape: GraphShape, 
                  max_epochs: int, 
-                 max_epsilon: float, 
-                 epsilon_sine_period: float,
+                 sine_amp: float, 
+                 sine_period: float,
                  admittee_type: AdmitteeType):
-        super().__init__(a, shape, max_epochs, max_epsilon, epsilon_sine_period)
+        super().__init__(a, shape, max_epochs, sine_amp, sine_period)
         self.admittee_type = admittee_type
         
     def _play_round(self, n: int, window_s: int):

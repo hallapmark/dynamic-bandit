@@ -4,9 +4,9 @@ import matplotlib.pyplot as plot
 from scipy.stats import beta
 
 class PlotSine:
-    def __init__(self, max_epochs, sine_epsilons: np.ndarray):
+    def __init__(self, max_epochs, sine_deltas: np.ndarray):
         self.epochs = np.arange(0, max_epochs, 1)
-        self.p = [0.5 + e for e in sine_epsilons]
+        self.p = [0.5 + d for d in sine_deltas]
 
     def plot_fig1_AB_ob_chance_of_payoff(self):
         ax = plot.gca()

@@ -49,8 +49,8 @@ class SimMetrics:
     
     def record_round_correct_actions(self, g):
         g: graph.Graph = g
-        epsilon = g.epsilons[g.epoch]
-        b_better = epsilon >= 0
+        delta = g.sine_deltas[g.epoch]
+        b_better = delta >= 0
         self.correct_actions.append("B" if b_better else "A")
     
     def record_round_taken_actions(self, g):

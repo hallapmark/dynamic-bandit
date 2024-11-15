@@ -17,7 +17,7 @@ class SimResults(NamedTuple):
     agents: int
     max_epochs: int
     trials: int
-    max_epsilon: float
+    sine_amp: float
     sine_period: int
     burn_in: int
     window_s: Optional[int]
@@ -35,7 +35,7 @@ class AnalyzedResults(NamedTuple):
     agents: int
     max_epochs: int
     trials: int
-    max_epsilon: float
+    sine_amp: float
     sine_period: int
     burn_in: int
     window_s: Optional[int]
