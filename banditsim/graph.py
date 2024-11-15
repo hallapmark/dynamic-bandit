@@ -63,7 +63,8 @@ class Graph:
     
     def _standard_round_actions(self, n: int, window_s: Optional[int]):
         self.run_experiments(n, self.epoch)
-        self.expectation_update_agents(window_s)
+        for a in self.agents:
+            self.update_expectation(a, window_s)
         self.epoch += 1
 
     def run_burn_in(self, n, burn_in, p):
@@ -78,24 +79,23 @@ class Graph:
         p = 0.5 + d
         for a in self.agents:
             a.decide_experiment(n, p)
-        
-    def expectation_update_agents(self, window_s: Optional[int]):
-        for a in self.agents:
-            total_k, total_n = 0, 0
-            for neighbor in self.graph[a]: # Note: everyone is their own neighbor as well
-                if window_s:
-                    B_data = neighbor.action_B_data[-window_s:]
-                else: 
-                    B_data = neighbor.action_B_data
-                k = sum([exp.k for exp in B_data])
-                n = sum([exp.n for exp in B_data])
-                total_k += k
-                total_n += n
-            # add burn-in data
-            total_k += sum([exp.k for exp in a.private_B_data])
-            total_n += sum([exp.n for exp in a.private_B_data])
-            if total_n > 0:
-                a.expectation_B_update(total_k, total_n)
+    
+    def update_expectation(self, a: Agent, window_s: Optional[int]):
+        total_k, total_n = 0, 0
+        for neighbor in self.graph[a]: # Note: everyone is their own neighbor as well
+            if window_s:
+                B_data = neighbor.action_B_data[-window_s:]
+            else: 
+                B_data = neighbor.action_B_data
+            k = sum([exp.k for exp in B_data])
+            n = sum([exp.n for exp in B_data])
+            total_k += k
+            total_n += n
+        # add burn-in data
+        total_k += sum([exp.k for exp in a.private_B_data])
+        total_n += sum([exp.n for exp in a.private_B_data])
+        if total_n > 0:
+            a.expectation_B_update(total_k, total_n)
     
     def build_sine_deltas(self, sine_amp: float, t: np.ndarray, period: int):
         """ Returns a numpy array of deltas (floats) shaped like a sine wave
