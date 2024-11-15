@@ -47,7 +47,7 @@ class Graph:
     def __str__(self):
         return "\n" + "\n".join([str(a) for a in self.agents])
 
-    def run_simulation(self, n: int, burn_in: int, window_s: int):
+    def run_simulation(self, n: int, burn_in: int, window_s: Optional[int]):
         self.run_burn_in(n, burn_in, .5 + self.sine_amp)
 
         ## TODO: Verify that this runs *exactly* the number of times we want
@@ -56,12 +56,12 @@ class Graph:
             
         self.metrics.record_sim_end_metrics(self, n)
 
-    def _play_round(self, n: int, window_s: int):
+    def _play_round(self, n: int, window_s: Optional[int]):
         # if self.epoch % 1000 == 0:
         #     print(f"A sim reached {self.epoch}")
         self._standard_round_actions(n, window_s)
     
-    def _standard_round_actions(self, n: int, window_s: int):
+    def _standard_round_actions(self, n: int, window_s: Optional[int]):
         self.run_experiments(n, self.epoch)
         self.expectation_update_agents(window_s)
         self.epoch += 1
