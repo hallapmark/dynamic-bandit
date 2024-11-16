@@ -3,39 +3,33 @@ import numpy as np
 
 from . import metrics
 from banditsim.agent import *
-from banditsim.models import GraphShape
+from banditsim.models import GraphShape, SimParams
 
 class Graph:
     def __init__(self, 
-                 a: int, 
-                 shape: GraphShape, 
-                 max_epochs: int, 
-                 sine_amp: float, 
-                 sine_period: float,
-                 epsilon: float,
-                 window_s: Optional[int]):
+                 params: SimParams):
         np.random.seed()
-        self.agents = [Agent(window_s is not None) for _ in range(a)]
+        self.agents = [Agent(params.window_s is not None) for _ in range(params.a)]
         self.graph: dict[Agent, list[Agent]] = dict()
         self._epoch = 0
-        self.epsilon = epsilon
-        self.window_s = window_s
         
         ## Config
-        self.max_epochs = max_epochs
-        self.sine_amp = sine_amp
+        self.epsilon = params.epsilon
+        self.window_s = params.window_s
+        self.max_epochs = params.max_epochs
+        self.sine_amp = params.sine_amp
         t = np.arange(0, self.max_epochs, 1)
-        self.sine_deltas = self.build_sine_deltas(sine_amp, t, sine_period)
+        self.sine_deltas = self.build_sine_deltas(params.sine_amp, t, params.sine_period)
 
         ## Outcome
         self.metrics = metrics.SimMetrics()
 
         ## Structure the network
         n_agents = len(self.agents)
-        if shape == GraphShape.CYCLE:
+        if params.graph_shape == GraphShape.CYCLE:
             for i in range(n_agents):
-                self.graph[self.agents[i]] = [ self.agents[i - 1], self.agents[i], self.agents[(i + 1) % a] ]
-        elif shape == GraphShape.COMPLETE:
+                self.graph[self.agents[i]] = [ self.agents[i - 1], self.agents[i], self.agents[(i + 1) % params.a] ]
+        elif params.graph_shape == GraphShape.COMPLETE:
             for i in range(n_agents):
                 self.graph[self.agents[i]] = self.agents
     

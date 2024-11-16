@@ -6,6 +6,17 @@ class GraphShape(Enum):
     COMPLETE = auto()
     CYCLE = auto()
 
+class SimParams(NamedTuple):
+    graph_shape: GraphShape
+    a: int
+    n: int
+    sine_amp: float
+    sine_period: float
+    max_epochs: int
+    burn_in: int
+    epsilon: float
+    window_s: Optional[int]
+
 class SimResults(NamedTuple):
     ## Results for a given sim
     # Config

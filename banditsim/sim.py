@@ -4,34 +4,33 @@ from multiprocessing import Pool
 import numpy as np
 
 from banditsim.graph import Graph
-from banditsim.models import AnalyzedResults, SimResults
+from banditsim.models import AnalyzedResults, SimParams, SimResults
 from plot_graphs import PlotSine
 
-def process(grid, path):
+def process(n_simulations, grid: list[SimParams], path):
     for params in grid:
         print(params)
-        n_simulations, graph, a, n, sine_amp, sine_period, max_epochs, burn_in, epsilon, window_s = params
         pool = Pool()
-        results = pool.starmap(
-            run_simulation, ((graph, a, n, sine_amp, sine_period, max_epochs, burn_in, epsilon,
-                              window_s),) * n_simulations)
+        results = pool.map(
+            run_simulation, (params,) * n_simulations) # n simulations per given config
         pool.close()
         pool.join()
         # for _ in range(n_simulations):
-        #     results = run_simulation(graph, a, n, sine_amp, sine_period, max_epochs, burn_in, epsilon, window_s)
+        #     results = run_simulation(params)
         #     break
         pathname, extension = os.path.splitext(path)
         record_data_dump(results, pathname + '_datadump' + extension)
         record_analysis(analyzed_results(results), path)
 
-def run_simulation(graph, a, n, sine_amp, sine_period, max_epochs, burn_in, epsilon, window_s):
-    g = Graph(a, graph, max_epochs, sine_amp, sine_period, epsilon, window_s)
-    g.run_simulation(n, burn_in)
+def run_simulation(params: SimParams):
+    g = Graph(params)
+    g.run_simulation(params.n, params.burn_in)
     # plotsine = PlotSine(g.max_epochs, g.sine_deltas) # Uncomment to draw plot
     # plotsine.plot_fig1_AB_ob_chance_of_payoff() # Currently plot can only be drawn if multiprocessing is disabled above
-    # plotsine.plot_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations, epsilon)
-    return SimResults(graph_shape=graph, agents=a, max_epochs=max_epochs, trials=n, sine_amp=sine_amp, 
-                      sine_period=sine_period, burn_in=burn_in, epsilon=epsilon, window_s=window_s, lifecycle=False, 
+    # plotsine.plot_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations, params.epsilon)
+    return SimResults(graph_shape=params.graph_shape, agents=params.a, max_epochs=params.max_epochs, trials=params.n, 
+                      sine_amp=params.sine_amp, sine_period=params.sine_period, burn_in=params.burn_in, 
+                      epsilon=params.epsilon, window_s=params.window_s, lifecycle=False, 
                       epochs=g.epoch, av_utility=g.metrics.sim_average_utility)
 
 def record_data_dump(simresults: list[SimResults], path):
