@@ -83,7 +83,7 @@ class Agent:
             self.expectation_B_update(total_k, total_n)
         
     def expectation_B_update(self, k, n):
-        self.expectation_B = (k + 1) / (n + 2)
+        self.expectation_B = k / n
 
     def report_exp_B_data(self, window_s: Optional[int]):
         """ Reports all-time experiment B_data or within a window size as requested."""
