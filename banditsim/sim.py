@@ -26,7 +26,7 @@ def process(n_simulations, grid: list[SimParams], path):
 def run_simulation(params: SimParams):
     g = Graph(params)
     g.run_simulation(params.n, params.burn_in)
-    # plotsine = PlotSine(g.max_epochs, g.sine_deltas) # Uncomment to draw plot
+    # plotsine = PlotSine(g.params.max_epochs, g.sine_deltas) # Uncomment to draw plot
     # plotsine.plot_fig1_AB_ob_chance_of_payoff() # Currently plot can only be drawn if multiprocessing is disabled above
     # plotsine.plot_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations, params.epsilon)
     return SimResults(graph_shape=params.graph_shape, agents=params.a, max_epochs=params.max_epochs, trials=params.n, 
