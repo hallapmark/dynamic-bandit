@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 from numpy import random
@@ -15,7 +16,7 @@ class Agent:
         # All-time k, n
         self._A_data_total = ExperimentData(0, 0)
         self._B_data_total = ExperimentData(0, 0)
-        self.private_B_data = ExperimentData(0, 0)
+        self._private_B_data = ExperimentData(0, 0)
 
         # Round-by-round records of trials
         self._A_round_by_round_data: list[ExperimentData] = [] # Each element is one round's experiment data
@@ -27,7 +28,7 @@ class Agent:
     def __str__(self):
         return (f"expectation = {round(self.expectation_B, 2)}, " 
                 f"k = {self._B_data_total.k}, n = {self._B_data_total.n}, "
-                f"burn_in k: {self.private_B_data.k}, burn_in n: {self.private_B_data.n}")
+                f"burn_in k: {self._private_B_data.k}, burn_in n: {self._private_B_data.n}")
     
     def experiment(self, n, p, epsilon):
         """ Experiment. Parameters:\n
@@ -67,7 +68,19 @@ class Agent:
     
     def burn_in(self, n, p):
         k = random.binomial(n, p)
-        self.private_B_data = ExperimentData(self.private_B_data.k + k, self.private_B_data.n + n)
+        self._private_B_data = ExperimentData(self._private_B_data.k + k, self._private_B_data.n + n)
+
+    def update_expectation_on_neighbors(self, neighbors: list[Agent], window_s: Optional[int]):
+        total_k, total_n = 0, 0
+        for neighbor in neighbors: 
+            k, n = neighbor.report_exp_B_data(window_s)
+            total_k += k
+            total_n += n
+        # add burn-in data
+        total_k += self._private_B_data.k
+        total_n += self._private_B_data.n
+        if total_n > 0:
+            self.expectation_B_update(total_k, total_n)
         
     def expectation_B_update(self, k, n):
         self.expectation_B = (k + 1) / (n + 2)

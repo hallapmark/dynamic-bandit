@@ -17,6 +17,7 @@ def process(n_simulations, grid: list[SimParams], path):
         pool.join()
         # for _ in range(n_simulations):
         #     results = run_simulation(params)
+        #     breakpoint()
         #     break
         pathname, extension = os.path.splitext(path)
         record_data_dump(results, pathname + '_datadump' + extension)
