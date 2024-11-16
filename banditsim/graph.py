@@ -3,7 +3,7 @@ import numpy as np
 
 from . import metrics
 from banditsim.agent import *
-from banditsim.models import AdmitteeType, GraphShape
+from banditsim.models import GraphShape
 
 class Graph:
     def __init__(self, 
@@ -95,47 +95,9 @@ class Graph:
         total_n += a.private_B_data.n
         if total_n > 0:
             a.expectation_B_update(total_k, total_n)
-            
+
     def build_sine_deltas(self, sine_amp: float, t: np.ndarray, period: int):
         """ Returns a numpy array of deltas (floats) shaped like a sine wave
         fluctuating between sine_amp and -sine_amp."""
         b = 2 * np.pi  / period
         return sine_amp * np.sin(b * (t + period / 4))
-
-class LifecycleGraph(Graph):
-    def __init__(self, 
-                 a: int, 
-                 shape: GraphShape, 
-                 max_epochs: int, 
-                 sine_amp: float, 
-                 sine_period: float,
-                 epsilon: float,
-                 window_s: Optional[int],
-                 admittee_type: AdmitteeType):
-        super().__init__(a, shape, max_epochs, sine_amp, sine_period, epsilon, window_s)
-        raise NotImplementedError("k and n storage logic needs to be changed for licecycle networks")
-        self.admittee_type = admittee_type
-        
-    def _play_round(self, n: int, window_s: int, epsilon: float):
-        self._standard_round_actions(n, window_s, epsilon)
-        if self.epoch % 10 == 0:
-            self._retire_someone(self.admittee_type)
-        
-    def _retire_someone(self, admitteetype: AdmitteeType):
-        eligible = [a for a in self.agents if a.age >= 20]
-        if not eligible: 
-            return
-        
-        retiree: Agent = np.random.choice(eligible)
-        if not retiree:
-            raise ValueError("We should not reach this. No retiree agent found.")
-        existing_av = np.mean([a.expectation_B for a in self.agents]) 
-        # TODO: properly this should be average of all agents NOT the retiree. 
-        # (But the difference should be negligible)
-        retiree.__init__(self.window_s is not None) # re-initialize retiree to new agent
-        match admitteetype:
-            case AdmitteeType.CONFORMIST:
-                retiree.expectation_B = existing_av
-                # TODO: Do we want to have burn_in for newcomers???
-            case AdmitteeType.NONCONFORMIST:
-                retiree.expectation_B = np.random.uniform(0,1)

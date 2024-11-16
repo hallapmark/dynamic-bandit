@@ -6,10 +6,6 @@ class GraphShape(Enum):
     COMPLETE = auto()
     CYCLE = auto()
 
-class AdmitteeType(Enum):
-    NONCONFORMIST = auto() # Enter with random[??] belief/expectation for B
-    CONFORMIST = auto() # Conform to existing network's average expectation
-    
 class SimResults(NamedTuple):
     ## Results for a given sim
     # Config
@@ -22,8 +18,7 @@ class SimResults(NamedTuple):
     burn_in: int
     epsilon: float # Epsilon here is the epsilon of the e-greedy strategy
     window_s: Optional[int]
-    lifecycle: bool
-    admitteetype: AdmitteeType
+    lifecycle: bool # Not yet implemented
     
     # Outcome
     epochs: int
@@ -42,7 +37,6 @@ class AnalyzedResults(NamedTuple):
     epsilon: float
     window_s: Optional[int]
     lifecycle: bool
-    admitteetype: AdmitteeType
 
     # Results over all sims
     av_utility: float
