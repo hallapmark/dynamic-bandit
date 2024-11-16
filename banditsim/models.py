@@ -20,6 +20,7 @@ class SimResults(NamedTuple):
     sine_amp: float
     sine_period: int
     burn_in: int
+    epsilon: float # Epsilon here is the epsilon of the e-greedy strategy
     window_s: Optional[int]
     lifecycle: bool
     admitteetype: AdmitteeType
@@ -38,6 +39,7 @@ class AnalyzedResults(NamedTuple):
     sine_amp: float
     sine_period: int
     burn_in: int
+    epsilon: float
     window_s: Optional[int]
     lifecycle: bool
     admitteetype: AdmitteeType

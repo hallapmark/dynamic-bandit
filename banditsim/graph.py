@@ -12,11 +12,13 @@ class Graph:
                  max_epochs: int, 
                  sine_amp: float, 
                  sine_period: float,
+                 epsilon: float,
                  window_s: Optional[int]):
         np.random.seed()
         self.agents = [Agent(window_s is not None) for _ in range(a)]
         self.graph: dict[Agent, list[Agent]] = dict()
         self._epoch = 0
+        self.epsilon = epsilon
         self.window_s = window_s
         
         ## Config
@@ -54,17 +56,17 @@ class Graph:
 
         ## TODO: Verify that this runs *exactly* the number of times we want
         while self.epoch < self.max_epochs:
-            self._play_round(n, self.window_s)
+            self._play_round(n, self.window_s, self.epsilon)
             
         self.metrics.record_sim_end_metrics(self, n)
 
-    def _play_round(self, n: int, window_s: Optional[int]):
+    def _play_round(self, n: int, window_s: Optional[int], epsilon: float):
         # if self.epoch % 1000 == 0:
         #     print(f"A sim reached {self.epoch}")
-        self._standard_round_actions(n, window_s)
+        self._standard_round_actions(n, window_s, epsilon)
     
-    def _standard_round_actions(self, n: int, window_s: Optional[int]):
-        self.run_experiments(n, self.epoch)
+    def _standard_round_actions(self, n: int, window_s: Optional[int], epsilon: float):
+        self.run_experiments(n, self.epoch, epsilon)
         for a in self.agents:
             self.update_expectation(a, window_s)
         self.epoch += 1
@@ -76,11 +78,11 @@ class Graph:
             for a in self.agents:
                 a.burn_in(n, p)
 
-    def run_experiments(self, n, epoch):
+    def run_experiments(self, n, epoch, epsilon):
         d = self.sine_deltas[epoch]
         p = 0.5 + d
         for a in self.agents:
-            self.metrics.sim_total_utility += a.experiment(n, p)
+            self.metrics.sim_total_utility += a.experiment(n, p, epsilon)
     
     def update_expectation(self, a: Agent, window_s: Optional[int]):
         total_k, total_n = 0, 0
@@ -107,14 +109,15 @@ class LifecycleGraph(Graph):
                  max_epochs: int, 
                  sine_amp: float, 
                  sine_period: float,
+                 epsilon: float,
                  window_s: Optional[int],
                  admittee_type: AdmitteeType):
-        super().__init__(a, shape, max_epochs, sine_amp, sine_period, window_s)
+        super().__init__(a, shape, max_epochs, sine_amp, sine_period, epsilon, window_s)
         raise NotImplementedError("k and n storage logic needs to be changed for licecycle networks")
         self.admittee_type = admittee_type
         
-    def _play_round(self, n: int, window_s: int):
-        self._standard_round_actions(n, window_s)
+    def _play_round(self, n: int, window_s: int, epsilon: float):
+        self._standard_round_actions(n, window_s, epsilon)
         if self.epoch % 10 == 0:
             self._retire_someone(self.admittee_type)
         

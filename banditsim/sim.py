@@ -10,32 +10,32 @@ from plot_graphs import PlotSine
 def process(grid, path):
     for params in grid:
         print(params)
-        n_simulations, graph, a, n, sine_amp, sine_period, max_epochs, burn_in, window_s, lifecycle, admitteetype = params
+        n_simulations, graph, a, n, sine_amp, sine_period, max_epochs, burn_in, epsilon, window_s, lifecycle, admitteetype = params
         pool = Pool()
         results = pool.starmap(
-            run_simulation, ((graph, a, n, sine_amp, sine_period, max_epochs, burn_in, 
+            run_simulation, ((graph, a, n, sine_amp, sine_period, max_epochs, burn_in, epsilon,
                               window_s, lifecycle, admitteetype),) * n_simulations)
         pool.close()
         pool.join()
         # for _ in range(n_simulations):
-        #     results = run_simulation(graph, a, n, sine_amp, sine_period, max_epochs, burn_in, window_s, lifecycle, admitteetype)
+        #     results = run_simulation(graph, a, n, sine_amp, sine_period, max_epochs, burn_in, epsilon, window_s, lifecycle, admitteetype)
         #     break
         pathname, extension = os.path.splitext(path)
         record_data_dump(results, pathname + '_datadump' + extension)
         record_analysis(analyzed_results(results), path)
 
-def run_simulation(graph, a, n, sine_amp, sine_period, max_epochs, burn_in, window_s, lifecycle, admitteetype):
+def run_simulation(graph, a, n, sine_amp, sine_period, max_epochs, burn_in, epsilon, window_s, lifecycle, admitteetype):
     if lifecycle:
-        g = LifecycleGraph(a, graph, max_epochs, sine_amp, sine_period, window_s, admitteetype)
+        g = LifecycleGraph(a, graph, max_epochs, sine_amp, sine_period, epsilon, window_s, admitteetype)
         g.run_simulation(n, burn_in)
     else:
-        g = Graph(a, graph, max_epochs, sine_amp, sine_period, window_s)
+        g = Graph(a, graph, max_epochs, sine_amp, sine_period, epsilon, window_s)
         g.run_simulation(n, burn_in)
     # plotsine = PlotSine(g.max_epochs, g.sine_deltas) # Uncomment to draw plot
     # plotsine.plot_fig1_AB_ob_chance_of_payoff() # Currently plot can only be drawn if multiprocessing is disabled above
-    # plotsine.plot_fig2_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations)
+    # plotsine.plot_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations, epsilon)
     return SimResults(graph_shape=graph, agents=a, max_epochs=max_epochs, trials=n, sine_amp=sine_amp, 
-                      sine_period=sine_period, burn_in=burn_in, window_s=window_s, lifecycle=lifecycle, 
+                      sine_period=sine_period, burn_in=burn_in, epsilon=epsilon, window_s=window_s, lifecycle=lifecycle, 
                       admitteetype=admitteetype, epochs=g.epoch, av_utility=g.metrics.sim_average_utility)
 
 def record_data_dump(simresults: list[SimResults], path):
@@ -59,5 +59,5 @@ def analyzed_results(simresults: list[SimResults]):
     av_utility = round(np.mean([res.av_utility for res in simresults]), 7)
     sim = simresults[0] # grab metadata/params
     return AnalyzedResults(sim.graph_shape, sim.agents, sim.max_epochs, sim.trials, sim.sine_amp,
-                           sim.sine_period, sim.burn_in, sim.window_s, sim.lifecycle, 
+                           sim.sine_period, sim.burn_in, sim.epsilon, sim.window_s, sim.lifecycle, 
                            sim.admitteetype, av_utility)

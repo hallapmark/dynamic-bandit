@@ -22,12 +22,18 @@ class PlotSine:
         plot.legend() 
         plot.show()
 
-    def plot_fig2_expectation_vs_ob_chance_of_payoff(self, agent_expectations):
+    def plot_expectation_vs_ob_chance_of_payoff(self, agent_expectations, epsilon):
+        # E.g. Fig 2
+        title = ""
+        if epsilon > 0:
+            title = "Chance of payoff and its estimation (epsilon-greedy)"
+        else:
+            title = "Chance of payoff and its estimation (myopic agents)"
         ax = plot.gca()
         ax.set_ylim([min(self.p+agent_expectations), max(self.p+agent_expectations)])
         plot.plot(self.epochs, self.p, label = "$P_B$ (objective)")
         plot.plot(self.epochs, agent_expectations, label = "Estimate (subjective)")
-        plot.title('Chance of payoff and its estimation (myopic agents)')
+        plot.title(title)
         plot.xlabel('Time (round of play)')
         plot.ylabel('Chance of payoff')
         plot.grid(True, which='both')

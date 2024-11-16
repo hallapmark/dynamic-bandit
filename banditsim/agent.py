@@ -29,13 +29,23 @@ class Agent:
                 f"k = {self._B_data_total.k}, n = {self._B_data_total.n}, "
                 f"burn_in k: {self.private_B_data.k}, burn_in n: {self.private_B_data.n}")
     
-    def experiment(self, n, p):
-        """ Experiment. Returns k (number of successes this round)"""
+    def experiment(self, n, p, epsilon):
+        """ Experiment. Parameters:\n
+        n: number of trials to run\n
+        p: objective probability of payoff from B. (For A, it is always .5)\n
+        epsilon: probability that the agent will explore rather than exploit (epsilon-greedy strategy). 
+        If 0, then the agent always takes the exploit action (myopic strategy). 
+
+        Returns k (number of successes this round). 
+        """
         self.age += 1 
-        if self.expectation_B >= .5: # MYOPIC/max-exploit rule, tie broken in favor of B
+        if self.expectation_B >= .5 or self.decide_to_explore(epsilon): 
             return self.experiment_B(n, p)
         else:
             return self.experiment_A(n)
+        
+    def decide_to_explore(self, epsilon: float) -> bool:
+        return random.choice([True, False], 1, p=[epsilon, 1-epsilon])[0]
 
     def experiment_A(self, n) -> int:
         """ Experiment with A. Returns k (number of successes this round)"""
@@ -54,14 +64,14 @@ class Agent:
         if self.keep_round_records:
             self._B_round_by_round_data.append(ExperimentData(k, n))
         return k
-                 
+    
     def burn_in(self, n, p):
         k = random.binomial(n, p)
         self.private_B_data = ExperimentData(self.private_B_data.k + k, self.private_B_data.n + n)
-
+        
     def expectation_B_update(self, k, n):
         self.expectation_B = (k + 1) / (n + 2)
-        
+
     def report_exp_B_data(self, window_s: Optional[int]):
         """ Reports all-time experiment B_data or within a window size as requested."""
         if window_s:
