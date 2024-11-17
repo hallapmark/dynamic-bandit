@@ -14,8 +14,9 @@ class SimParams(NamedTuple):
     sine_period: float
     max_epochs: int
     burn_in: int
-    epsilon: float
+    epsilon: float # Epsilon here is the epsilon of the epsilon-greedy strategy
     window_s: Optional[int]
+    slow_updater_multiplier: Optional[int] # If set, one slow updater will update expectation with e.g. 1/4 speed  
 
 class SimResults(NamedTuple):
     ## Results for a given sim
@@ -27,9 +28,10 @@ class SimResults(NamedTuple):
     sine_amp: float
     sine_period: int
     burn_in: int
-    epsilon: float # Epsilon here is the epsilon of the e-greedy strategy
+    epsilon: float 
     window_s: Optional[int]
     lifecycle: bool # Not yet implemented
+    slow_updater_multiplier: Optional[int] 
     
     # Outcome
     epochs: int
@@ -48,6 +50,7 @@ class AnalyzedResults(NamedTuple):
     epsilon: float
     window_s: Optional[int]
     lifecycle: bool
+    slow_updater_multiplier: Optional[int]
 
     # Results over all sims
     av_utility: float

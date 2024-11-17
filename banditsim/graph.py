@@ -9,7 +9,11 @@ class Graph:
     def __init__(self, 
                  params: SimParams):
         np.random.seed()
-        self.agents = [Agent(params.window_s is not None) for _ in range(params.a)]
+        keep_round_records = params.window_s is not None
+        self.agents = [Agent(keep_round_records) for _ in range(params.a)]
+        if params.slow_updater_multiplier:
+            ind = np.random.choice(range(len(self.agents)))
+            self.agents[ind] = SlowUpdater(keep_round_records, params.slow_updater_multiplier)
         self.graph: dict[Agent, list[Agent]] = dict()
         self._epoch = 0
         
@@ -20,6 +24,7 @@ class Graph:
 
         ## Outcome
         self.metrics = metrics.SimMetrics()
+        #self.slow_updater_expectations = []
 
         ## Structure the network
         n_agents = len(self.agents)
@@ -61,6 +66,8 @@ class Graph:
         for a in self.agents:
             # Note: everyone is their own neighbor as well
             a.update_expectation_on_neighbors([neighbor for neighbor in self.graph[a]], window_s)
+            # if isinstance(a, SlowUpdater):
+            #     self.slow_updater_expectations.append(a.expectation_B)
         self.epoch += 1
 
     def run_burn_in(self, n, burn_in, p):
