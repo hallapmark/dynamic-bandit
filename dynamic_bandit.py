@@ -10,29 +10,27 @@ if __name__ == '__main__':
     max_epochs = 10000
 
     grid = [SimParams(GraphShape.COMPLETE, a, 50, sine_amp, sine_period, max_epochs, burn_in, epsilon,
-             window_s, slow_updater_multiplier) 
-                                                                for a in (5,10,) # 4, 12
+             window_s) 
+                                                                for a in (5,10) # 4, 12
                                                                 for sine_amp in (.1,)
                                                                 for sine_period in (1000,)
                                                                 for burn_in in (1,)
-                                                                for epsilon in (0,0.05,0.1,0.15)
-                                                                for window_s in (None,50,100) # 50, 100
-                                                                for slow_updater_multiplier in (None,)
+                                                                for epsilon in (0,)
+                                                                for window_s in (None,) # 50, 100
                                                                 ]
     
     grid += [SimParams(GraphShape.CYCLE, a, 50, sine_amp, sine_period, max_epochs, burn_in, epsilon, 
-             window_s, slow_updater_multiplier)
+             window_s)
                                                                 for a in (5,10,) # 4, 12
                                                                 for sine_amp in (.1,)
                                                                 for sine_period in (1000,)
                                                                 for burn_in in (1,)
-                                                                for epsilon in (0,0.05,0.1,0.15)
-                                                                for window_s in (None,50,100)
-                                                                for slow_updater_multiplier in (None,)
+                                                                for epsilon in (0,)
+                                                                for window_s in (None,)
                                                                 ]
 
     tic = timeit.default_timer()
-    process(n_simulations, grid, 'results/test.csv')
+    process(n_simulations, grid, 'results/results_prelim.csv')
     toc = timeit.default_timer()
 
     print("Time: " + str(round(toc - tic, 1)))

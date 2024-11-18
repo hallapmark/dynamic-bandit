@@ -97,20 +97,3 @@ class Agent:
         else:
             B_data = self._B_data_total
             return B_data.k, B_data.n
-
-class SlowUpdater(Agent):
-    def __init__(self, keep_round_records: bool, slow_updater_multiplier: float):
-        super().__init__(keep_round_records)
-        self.slow_updater_multiplier = slow_updater_multiplier
-        
-    def expectation_B_update(self, k, n):
-        """ Override expectation updating method and slow it down."""
-        self._expectation_B_slow_update(k, n)
-
-    def _expectation_B_slow_update(self, k, n):
-        
-        target = k / n # the expectation the agent would come to have if they udpated k/n
-        source = self.expectation_B # Agent's current expectation
-        d = target - source # E.g. if target =.5, source =.6. then d=-.1
-        self.expectation_B = source + d * self.slow_updater_multiplier # Slowed-down update, e.g. * 1/4
-        

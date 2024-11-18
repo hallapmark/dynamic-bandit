@@ -29,11 +29,9 @@ def run_simulation(params: SimParams):
     # plotsine = PlotSine(g.params.max_epochs, g.sine_deltas) # Uncomment to draw plot
     # plotsine.plot_fig1_AB_ob_chance_of_payoff() # Currently plot can only be drawn if multiprocessing is disabled above
     # plotsine.plot_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations, params.epsilon)
-    # plotsine.plot_expectation_vs_ob_chance_of_payoff(g.slow_updater_expectations, params.epsilon)
     return SimResults(graph_shape=params.graph_shape, agents=params.a, max_epochs=params.max_epochs, trials=params.n, 
                       sine_amp=params.sine_amp, sine_period=params.sine_period, burn_in=params.burn_in, 
-                      epsilon=params.epsilon, window_s=params.window_s, lifecycle=False, 
-                      slow_updater_multiplier=params.slow_updater_multiplier, epochs=g.epoch, 
+                      epsilon=params.epsilon, window_s=params.window_s, lifecycle=False, epochs=g.epoch, 
                       av_utility=g.metrics.sim_average_utility)
 
 def record_data_dump(simresults: list[SimResults], path):
@@ -57,5 +55,5 @@ def analyzed_results(simresults: list[SimResults]):
     av_utility = round(np.mean([res.av_utility for res in simresults]), 7)
     sim = simresults[0] # grab metadata/params
     return AnalyzedResults(sim.graph_shape, sim.agents, sim.max_epochs, sim.trials, sim.sine_amp,
-                           sim.sine_period, sim.burn_in, sim.epsilon, sim.window_s, sim.lifecycle,
-                           sim.slow_updater_multiplier, av_utility)
+                           sim.sine_period, sim.burn_in, sim.epsilon, sim.window_s, sim.lifecycle, 
+                           av_utility)

@@ -16,10 +16,9 @@ class SimParams(NamedTuple):
     burn_in: int
     epsilon: float # Epsilon here is the epsilon of the epsilon-greedy strategy
     window_s: Optional[int]
-    slow_updater_multiplier: Optional[int] # If set, one slow updater will update expectation with e.g. 1/4 speed  
 
 class SimResults(NamedTuple):
-    ## Results for a given sim
+    ## Results for a given sim run
     # Config
     graph_shape: GraphShape
     agents: int
@@ -31,7 +30,6 @@ class SimResults(NamedTuple):
     epsilon: float 
     window_s: Optional[int]
     lifecycle: bool # Not yet implemented
-    slow_updater_multiplier: Optional[int] 
     
     # Outcome
     epochs: int
@@ -50,7 +48,6 @@ class AnalyzedResults(NamedTuple):
     epsilon: float
     window_s: Optional[int]
     lifecycle: bool
-    slow_updater_multiplier: Optional[int]
 
     # Results over all sims
     av_utility: float
