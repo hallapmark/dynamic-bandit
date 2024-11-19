@@ -1,0 +1,5 @@
+name: dynamic-bandits
+dependencies:
+    - python ==3.12
+    - numpy
+    - matplotlib
