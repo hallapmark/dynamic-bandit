@@ -25,4 +25,5 @@ python dynamic_bandit.py
 You can modify the parameters in `dynamic_bandit.py` to conduct experiments. By default, the agents update myopically. 
 
 `epsilon` > 0 enables the epsilon-greedy strategy
+
 `window_s` enables windowed updating (agents old data from rounds falling outside the window size).
