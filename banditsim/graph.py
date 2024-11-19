@@ -46,7 +46,6 @@ class Graph:
     def run_simulation(self, n: int, burn_in: int):
         self.run_burn_in(n, burn_in, .5 + self.params.sine_amp)
 
-        ## TODO: Verify that this runs *exactly* the number of times we want
         while self.epoch < self.params.max_epochs:
             self._play_round(n, self.params.window_s, self.params.epsilon)
             

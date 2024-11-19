@@ -90,7 +90,6 @@ class SimMetrics:
     #     got stuck early on one of the actions."""
         
     def record_proportion_correct_action(self, g):
-        # TODO: Verify this
         g: graph.Graph = g
         n_agents = len(g.agents)
         prop_list = []

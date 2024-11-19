@@ -1,7 +1,6 @@
 import numpy as np
 
 import matplotlib.pyplot as plot
-from scipy.stats import beta
 
 class PlotSine:
     def __init__(self, max_epochs, sine_deltas: np.ndarray):
