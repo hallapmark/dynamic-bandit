@@ -1,6 +1,6 @@
 import csv
 import os.path
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 import numpy as np
 
 from banditsim.graph import Graph
@@ -10,7 +10,7 @@ from plot_graphs import PlotSine
 def process(n_simulations, grid: list[SimParams], path):
     for params in grid:
         print(params)
-        pool = Pool()
+        pool = Pool(processes=max(cpu_count() - 1, 1)) # Leave one core for Reddit
         results = pool.map(
             run_simulation, (params,) * n_simulations) # n simulations per given config
         pool.close()
