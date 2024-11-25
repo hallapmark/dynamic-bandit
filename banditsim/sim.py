@@ -55,5 +55,5 @@ def record_analysis(analyzed_results: AnalyzedResults, path):
         writer.writerow([result_val for result_val in analyzed_results])
 
 def analyzed_results(simresults: list[SimResults], config: SimConfig):
-    av_utility = round(np.mean([sim.av_utility for sim in simresults]), 7)
+    av_utility = round(np.mean([sim.av_utility for sim in simresults]), 4)
     return AnalyzedResults(*config, False, av_utility)
