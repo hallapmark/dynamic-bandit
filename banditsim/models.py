@@ -6,7 +6,7 @@ class GraphShape(Enum):
     COMPLETE = auto()
     CYCLE = auto()
 
-class SimParams(NamedTuple):
+class SimConfig(NamedTuple):
     graph_shape: GraphShape
     a: int
     n: int

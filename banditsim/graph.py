@@ -3,31 +3,31 @@ import numpy as np
 
 from . import metrics
 from banditsim.agent import *
-from banditsim.models import GraphShape, SimParams
+from banditsim.models import GraphShape, SimConfig
 
 class Graph:
     def __init__(self, 
-                 params: SimParams):
+                 config: SimConfig):
         np.random.seed()
-        keep_round_records = params.window_s is not None
-        self.agents = [Agent(keep_round_records) for _ in range(params.a)]
+        keep_round_records = config.window_s is not None
+        self.agents = [Agent(keep_round_records) for _ in range(config.a)]
         self.graph: dict[Agent, list[Agent]] = dict()
         self._epoch = 0
         
         ## Config
-        self.params = params
-        t = np.arange(0, params.max_epochs, 1)
-        self.sine_deltas = self.build_sine_deltas(params.sine_amp, t, params.sine_period)
+        self.config = config
+        t = np.arange(0, config.max_epochs, 1)
+        self.sine_deltas = self.build_sine_deltas(config.sine_amp, t, config.sine_period)
 
         ## Outcome
         self.metrics = metrics.SimMetrics()
 
         ## Structure the network
         n_agents = len(self.agents)
-        if params.graph_shape == GraphShape.CYCLE:
+        if config.graph_shape == GraphShape.CYCLE:
             for i in range(n_agents):
-                self.graph[self.agents[i]] = [ self.agents[i - 1], self.agents[i], self.agents[(i + 1) % params.a] ]
-        elif params.graph_shape == GraphShape.COMPLETE:
+                self.graph[self.agents[i]] = [ self.agents[i - 1], self.agents[i], self.agents[(i + 1) % config.a] ]
+        elif config.graph_shape == GraphShape.COMPLETE:
             for i in range(n_agents):
                 self.graph[self.agents[i]] = self.agents
     
@@ -44,10 +44,10 @@ class Graph:
         return "\n" + "\n".join([str(a) for a in self.agents])
 
     def run_simulation(self, n: int, burn_in: int):
-        self.run_burn_in(n, burn_in, .5 + self.params.sine_amp)
+        self.run_burn_in(n, burn_in, .5 + self.config.sine_amp)
 
-        while self.epoch < self.params.max_epochs:
-            self._play_round(n, self.params.window_s, self.params.epsilon)
+        while self.epoch < self.config.max_epochs:
+            self._play_round(n, self.config.window_s, self.config.epsilon)
             
         self.metrics.record_sim_end_metrics(self, n)
 
