@@ -18,9 +18,8 @@ class Agent:
         self._B_data_total = ExperimentData(0, 0)
         self._private_B_data = ExperimentData(0, 0)
 
-        # Round-by-round records of trials
-        self._A_round_by_round_data: list[ExperimentData] = [] # Each element is one round's experiment data
-        self._B_round_by_round_data: list[ExperimentData] = [] 
+        # Round-by-round records of B trials
+        self._B_round_by_round_data: list[ExperimentData] = [] # Each element is one round's experiment data
 
         self.round_action = "" # "A" or "B"
         self.age = 0
@@ -53,8 +52,6 @@ class Agent:
         self.round_action = "A"
         k = random.binomial(n, .5)
         self._A_data_total = ExperimentData(self._A_data_total.k + k, self._A_data_total.n + n)
-        if self.keep_round_records:
-            self._A_round_by_round_data.append(ExperimentData(k, n))
         return k
 
     def experiment_B(self, n, p) -> int:
