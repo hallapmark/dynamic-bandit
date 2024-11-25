@@ -56,4 +56,4 @@ def record_analysis(analyzed_results: AnalyzedResults, path):
 
 def analyzed_results(simresults: list[SimResults], config: SimConfig):
     av_utility = round(np.mean([sim.av_utility for sim in simresults]), 4)
-    return AnalyzedResults(*config, False, av_utility)
+    return AnalyzedResults(len(simresults), *config, False, av_utility)

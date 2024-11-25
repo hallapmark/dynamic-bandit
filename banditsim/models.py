@@ -36,6 +36,7 @@ class SimResults(NamedTuple):
 
 class AnalyzedResults(NamedTuple):
     ## Analyzed results – includes averages over e.g. 1000 runs of sims of a given configuration
+    n_simulations: int
     # Config
     graph_shape: GraphShape
     agents: int
