@@ -9,9 +9,10 @@ class ExperimentData:
     n: int = 0
 
 class Agent:
-    def __init__(self, keep_round_records: bool):
+    def __init__(self, keep_round_records: bool, trials_per_round: int):
         self.expectation_B = random.uniform(0, 1)
         self.keep_round_records = keep_round_records
+        self.trials_per_round = trials_per_round
 
         # All-time k, n
         self._A_data_total = ExperimentData(0, 0)
@@ -19,7 +20,7 @@ class Agent:
         self._private_B_data = ExperimentData(0, 0)
 
         # Round-by-round records of B trials
-        self._B_round_by_round_data: list[ExperimentData] = [] # Each element is one round's experiment data
+        self._B_round_by_round_k: list[int] = [] # Each element is one round's payoff count k
 
         self.round_action = "" # "A" or "B"
         self.age = 0
@@ -29,20 +30,19 @@ class Agent:
                 f"k = {self._B_data_total.k}, n = {self._B_data_total.n}, "
                 f"burn_in k: {self._private_B_data.k}, burn_in n: {self._private_B_data.n}")
     
-    def experiment(self, n, p, epsilon):
+    def experiment(self, p, epsilon):
         """ Experiment. Parameters:\n
-        n: number of trials to run\n
         p: objective probability of payoff from B. (For A, it is always .5)\n
         epsilon: probability that the agent will explore rather than exploit (epsilon-greedy strategy). 
         If 0, then the agent always takes the exploit action (myopic strategy). 
 
-        Returns k (number of successes this round). 
+        Returns utility pulled from any source (= k, number of successes this round). 
         """
         self.age += 1 
         if self.expectation_B >= .5 or self.decide_to_explore(epsilon): 
-            return self.experiment_B(n, p)
+            return self.experiment_B(self.trials_per_round, p)
         else:
-            return self.experiment_A(n)
+            return self.experiment_A(self.trials_per_round)
         
     def decide_to_explore(self, epsilon: float) -> bool:
         return random.choice([True, False], 1, p=[epsilon, 1-epsilon])[0]
@@ -60,7 +60,7 @@ class Agent:
         k = random.binomial(n, p)
         self._B_data_total = ExperimentData(self._B_data_total.k + k, self._B_data_total.n + n)
         if self.keep_round_records:
-            self._B_round_by_round_data.append(ExperimentData(k, n))
+            self._B_round_by_round_k.append(k)
         return k
     
     def burn_in(self, n, p):
@@ -87,9 +87,9 @@ class Agent:
         if window_s:
             if not self.keep_round_records:
                 raise ValueError("Window-sized experiment data requested but round records not kept.")
-            B_data = self._B_round_by_round_data[-window_s:]
-            k = sum([exp.k for exp in B_data])
-            n = sum([exp.n for exp in B_data])
+            windowed_k_list = self._B_round_by_round_k[-window_s:]
+            k = sum(windowed_k_list)
+            n = self.trials_per_round * len(windowed_k_list)
             return k, n
         else:
             B_data = self._B_data_total

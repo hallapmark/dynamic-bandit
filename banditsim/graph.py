@@ -10,7 +10,7 @@ class Graph:
                  config: SimConfig):
         np.random.seed()
         keep_round_records = config.window_s is not None
-        self.agents = [Agent(keep_round_records) for _ in range(config.a)]
+        self.agents = [Agent(keep_round_records, config.n) for _ in range(config.a)]
         self.graph: dict[Agent, list[Agent]] = dict()
         self._epoch = 0
         
@@ -43,21 +43,16 @@ class Graph:
     def __str__(self):
         return "\n" + "\n".join([str(a) for a in self.agents])
 
-    def run_simulation(self, n: int, burn_in: int):
-        self.run_burn_in(n, burn_in, .5 + self.config.sine_amp)
+    def run_simulation(self):
+        self.run_burn_in(self.config.n, self.config.burn_in, .5 + self.config.sine_amp)
 
         while self.epoch < self.config.max_epochs:
-            self._play_round(n, self.config.window_s, self.config.epsilon)
+            self._play_round(self.config.window_s, self.config.epsilon)
             
-        self.metrics.record_sim_end_metrics(self, n)
+        self.metrics.record_sim_end_metrics(self, self.config.n)
 
-    def _play_round(self, n: int, window_s: Optional[int], epsilon: float):
-        # if self.epoch % 1000 == 0:
-        #     print(f"A sim reached {self.epoch}")
-        self._standard_round_actions(n, window_s, epsilon)
-    
-    def _standard_round_actions(self, n: int, window_s: Optional[int], epsilon: float):
-        self.run_experiments(n, self.epoch, epsilon)
+    def _play_round(self, window_s: Optional[int], epsilon: float):
+        self.run_experiments(self.epoch, epsilon)
         for a in self.agents:
             # Note: everyone is their own neighbor as well
             a.update_expectation_on_neighbors([neighbor for neighbor in self.graph[a]], window_s)
@@ -70,11 +65,11 @@ class Graph:
             for a in self.agents:
                 a.burn_in(n, p)
 
-    def run_experiments(self, n, epoch, epsilon):
+    def run_experiments(self, epoch, epsilon):
         d = self.sine_deltas[epoch]
         p = 0.5 + d
         for a in self.agents:
-            self.metrics.sim_total_utility += a.experiment(n, p, epsilon)
+            self.metrics.sim_total_utility += a.experiment(p, epsilon)
     
     def build_sine_deltas(self, sine_amp: float, t: np.ndarray, period: int):
         """ Returns a numpy array of deltas (floats) shaped like a sine wave

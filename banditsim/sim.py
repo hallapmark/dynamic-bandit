@@ -10,7 +10,7 @@ from plot_graphs import PlotSine
 def process(n_simulations: int, configs: list[SimConfig], path: str, multiprocessing: bool):
     for config in configs:
         process_config(n_simulations, config, path, multiprocessing)
-        
+
 def process_config(n_simulations: int, config: SimConfig, path: str, multiprocessing: bool):
     print(config)
     if multiprocessing:
@@ -28,10 +28,10 @@ def process_config(n_simulations: int, config: SimConfig, path: str, multiproces
     pathname, extension = os.path.splitext(path)
     record_data_dump(results, pathname + '_datadump' + extension)
     record_analysis(analyzed_results(results), path)
-
+    
 def run_simulation(config: SimConfig):
     g = Graph(config)
-    g.run_simulation(config.n, config.burn_in)
+    g.run_simulation()
     # plotsine = PlotSine(g.config.max_epochs, g.sine_deltas) # Uncomment to draw plot
     # plotsine.plot_fig1_AB_ob_chance_of_payoff() # Currently plot can only be drawn if multiprocessing is disabled above
     # plotsine.plot_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations, config.epsilon)
