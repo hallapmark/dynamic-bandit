@@ -10,7 +10,7 @@ class Graph:
                  config: SimConfig):
         np.random.seed()
         keep_round_records = config.window_s is not None
-        self.agents = [Agent(keep_round_records, config.n) for _ in range(config.a)]
+        self.agents = [Agent(keep_round_records, config.trials) for _ in range(config.agents)]
         self.graph: dict[Agent, list[Agent]] = dict()
         self._epoch = 0
         
@@ -26,7 +26,7 @@ class Graph:
         n_agents = len(self.agents)
         if config.graph_shape == GraphShape.CYCLE:
             for i in range(n_agents):
-                self.graph[self.agents[i]] = [ self.agents[i - 1], self.agents[i], self.agents[(i + 1) % config.a] ]
+                self.graph[self.agents[i]] = [ self.agents[i - 1], self.agents[i], self.agents[(i + 1) % config.agents] ]
         elif config.graph_shape == GraphShape.COMPLETE:
             for i in range(n_agents):
                 self.graph[self.agents[i]] = self.agents
@@ -44,12 +44,12 @@ class Graph:
         return "\n" + "\n".join([str(a) for a in self.agents])
 
     def run_simulation(self):
-        self.run_burn_in(self.config.n, self.config.burn_in, .5 + self.config.sine_amp)
+        self.run_burn_in(self.config.trials, self.config.burn_in, .5 + self.config.sine_amp)
 
         while self.epoch < self.config.max_epochs:
             self._play_round(self.config.window_s, self.config.epsilon)
             
-        self.metrics.record_sim_end_metrics(self, self.config.n)
+        self.metrics.record_sim_end_metrics(self, self.config.trials)
 
     def _play_round(self, window_s: Optional[int], epsilon: float):
         self.run_experiments(self.epoch, epsilon)

@@ -8,8 +8,8 @@ class GraphShape(Enum):
 
 class SimConfig(NamedTuple):
     graph_shape: GraphShape
-    a: int
-    n: int
+    agents: int
+    trials: int
     sine_amp: float
     sine_period: float
     max_epochs: int
@@ -22,32 +22,31 @@ class SimResults(NamedTuple):
     # Config
     graph_shape: GraphShape
     agents: int
-    max_epochs: int
     trials: int
     sine_amp: float
-    sine_period: int
-    burn_in: int
-    epsilon: float 
-    window_s: Optional[int]
-    lifecycle: bool # Not yet implemented
-    
-    # Outcome
-    epochs: int
-    av_utility: float # per agent per round per trial
-    
-class AnalyzedResults(NamedTuple):
-    ## Analyzed results – includes averages over e.g. 5000 runs of sims of a given configuration
-    # Config
-    graph_shape: GraphShape
-    agents: int
+    sine_period: float
     max_epochs: int
-    trials: int
-    sine_amp: float
-    sine_period: int
     burn_in: int
     epsilon: float
     window_s: Optional[int]
-    lifecycle: bool
+
+    # Results
+    epochs_run: int
+    av_utility: float # per agent per round per trial
+
+class AnalyzedResults(NamedTuple):
+    ## Analyzed results – includes averages over e.g. 1000 runs of sims of a given configuration
+    # Config
+    graph_shape: GraphShape
+    agents: int
+    trials: int
+    sine_amp: float
+    sine_period: int
+    max_epochs: int
+    burn_in: int
+    epsilon: float
+    window_s: Optional[int]
+    lifecycle: bool # not yet implemented
 
     # Results over all sims
     av_utility: float

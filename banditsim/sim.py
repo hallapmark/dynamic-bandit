@@ -27,7 +27,7 @@ def process_config(n_simulations: int, config: SimConfig, path: str, multiproces
             # break
     pathname, extension = os.path.splitext(path)
     record_data_dump(results, pathname + '_datadump' + extension)
-    record_analysis(analyzed_results(results), path)
+    record_analysis(analyzed_results(results, config), path)
     
 def run_simulation(config: SimConfig):
     g = Graph(config)
@@ -35,10 +35,7 @@ def run_simulation(config: SimConfig):
     # plotsine = PlotSine(g.config.max_epochs, g.sine_deltas) # Uncomment to draw plot
     # plotsine.plot_fig1_AB_ob_chance_of_payoff() # Currently plot can only be drawn if multiprocessing is disabled above
     # plotsine.plot_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations, config.epsilon)
-    return SimResults(graph_shape=config.graph_shape, agents=config.a, max_epochs=config.max_epochs, trials=config.n, 
-                      sine_amp=config.sine_amp, sine_period=config.sine_period, burn_in=config.burn_in, 
-                      epsilon=config.epsilon, window_s=config.window_s, lifecycle=False, epochs=g.epoch, 
-                      av_utility=g.metrics.sim_average_utility)
+    return SimResults(*config, g.epoch, g.metrics.sim_average_utility)
 
 def record_data_dump(simresults: list[SimResults], path):
     file_exists = os.path.isfile(path)
@@ -57,9 +54,6 @@ def record_analysis(analyzed_results: AnalyzedResults, path):
             writer.writerow([header for header in analyzed_results._asdict().keys()])
         writer.writerow([result_val for result_val in analyzed_results])
 
-def analyzed_results(simresults: list[SimResults]):
-    av_utility = round(np.mean([res.av_utility for res in simresults]), 7)
-    sim = simresults[0] # grab metadata/params
-    return AnalyzedResults(sim.graph_shape, sim.agents, sim.max_epochs, sim.trials, sim.sine_amp,
-                           sim.sine_period, sim.burn_in, sim.epsilon, sim.window_s, sim.lifecycle, 
-                           av_utility)
+def analyzed_results(simresults: list[SimResults], config: SimConfig):
+    av_utility = round(np.mean([sim.av_utility for sim in simresults]), 7)
+    return AnalyzedResults(*config, False, av_utility)
