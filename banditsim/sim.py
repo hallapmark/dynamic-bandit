@@ -32,9 +32,6 @@ def process_config(n_simulations: int, config: SimConfig, path: str, multiproces
 def run_simulation(config: SimConfig):
     g = Graph(config)
     g.run_simulation()
-    # plotsine = PlotSine(g.config.max_epochs, g.sine_deltas) # Uncomment to draw plot
-    # plotsine.plot_fig1_AB_ob_chance_of_payoff() # Currently plot can only be drawn if multiprocessing is disabled above
-    # plotsine.plot_expectation_vs_ob_chance_of_payoff(g.metrics.average_expectations, config.epsilon)
     return SimResults(*config, g.epoch, g.metrics.sim_average_utility)
 
 def record_data_dump(simresults: list[SimResults], path):
