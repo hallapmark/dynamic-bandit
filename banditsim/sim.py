@@ -7,23 +7,27 @@ from banditsim.graph import Graph
 from banditsim.models import AnalyzedResults, SimConfig, SimResults
 from plot_graphs import PlotSine
 
-def process(n_simulations, configs: list[SimConfig], path):
+def process(n_simulations: int, configs: list[SimConfig], path: str, multiprocessing: bool):
     for config in configs:
-        print(config)
+        process_config(n_simulations, config, path, multiprocessing)
+        
+def process_config(n_simulations: int, config: SimConfig, path: str, multiprocessing: bool):
+    print(config)
+    if multiprocessing:
         pool = Pool(processes=max(cpu_count() - 1, 1)) # Leave one core for Reddit
         results = pool.map(
             run_simulation, (config,) * n_simulations) # n simulations per given config
         pool.close()
         pool.join()
-        # for _ in range(n_simulations):
-        #     results = run_simulation(config)
-        #     breakpoint()
-        #     break
-        pathname, extension = os.path.splitext(path)
-        record_data_dump(results, pathname + '_datadump' + extension)
-        record_analysis(analyzed_results(results), path)
-        
-
+    else:
+        results: list[SimResults] = []
+        for _ in range(n_simulations):
+            results.append(run_simulation(config))
+            # breakpoint()
+            # break
+    pathname, extension = os.path.splitext(path)
+    record_data_dump(results, pathname + '_datadump' + extension)
+    record_analysis(analyzed_results(results), path)
 
 def run_simulation(config: SimConfig):
     g = Graph(config)

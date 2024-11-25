@@ -30,7 +30,7 @@ if __name__ == '__main__':
                                                                 ]
 
     tic = timeit.default_timer()
-    process(n_simulations, configs, 'results/results_prelim.csv')
+    process(n_simulations, configs, 'results/results_prelim.csv', True)
     toc = timeit.default_timer()
 
     print("Time: " + str(round(toc - tic, 1)))
