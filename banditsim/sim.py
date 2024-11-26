@@ -36,6 +36,7 @@ def run_simulation(config: SimConfig):
 
 def record_data_dump(simresults: list[SimResults], path):
     file_exists = os.path.isfile(path)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, mode = 'a') as csv_file:
         writer = csv.writer(csv_file)
         if not file_exists:
@@ -45,6 +46,7 @@ def record_data_dump(simresults: list[SimResults], path):
 
 def record_analysis(analyzed_results: AnalyzedResults, path):
     file_exists = os.path.isfile(path)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, mode = 'a') as csv_file:
         writer = csv.writer(csv_file)
         if not file_exists:
