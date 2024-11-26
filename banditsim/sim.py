@@ -5,7 +5,6 @@ import numpy as np
 
 from banditsim.graph import Graph
 from banditsim.models import AnalyzedResults, SimConfig, SimResults
-from plot_graphs import PlotSine
 
 def process(n_simulations: int, configs: list[SimConfig], path: str, multiprocessing: bool):
     for config in configs:

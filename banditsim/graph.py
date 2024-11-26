@@ -55,7 +55,7 @@ class Graph:
         self.run_experiments(self.epoch, epsilon)
         for a in self.agents:
             # Note: everyone is their own neighbor as well
-            a.update_expectation_on_neighbors([neighbor for neighbor in self.graph[a]], window_s)
+            a.update_expectation_on_neighbors(self.graph[a], window_s)
         self.epoch += 1
 
     def run_burn_in(self, n, burn_in, p):

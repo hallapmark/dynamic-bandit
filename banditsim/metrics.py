@@ -26,31 +26,25 @@ class SimMetrics:
     
     ## Sim-end summaries
     sim_proportion_correct_action = None
-    # sim_average_expectation = None
     sim_total_utility = 0
     sim_average_utility = None
-
+    
     def record_sim_end_metrics(self, g, trials):
         self.record_proportion_correct_action(g)
         self.record_sim_average_utility(g, trials)
-        # print(f'n_rounds_all_took_A: {self.n_rounds_all_took_A}')
-        # print(f'n_rounds_all_took_B: {self.n_rounds_all_took_B}')
-        # print(f'n_rounds_supermajority_took_A: {self.n_rounds_supermajority_took_A}')
-        # print(f'n_rounds_supermajority_took_B: {self.n_rounds_supermajority_took_B}')
-        # print(f'n_rounds_mixed_actions: {self.n_rounds_supermajority_took_B}')
 
     def record_round_metrics(self, g):
         g: graph.Graph = g
         self.record_round_correct_actions(g)
         self.record_round_taken_actions(g)
         self.record_round_average_expectation(g)
-    
+
     def record_round_correct_actions(self, g):
         g: graph.Graph = g
         delta = g.sine_deltas[g.epoch]
         b_better = delta >= 0
         self.correct_actions.append("B" if b_better else "A")
-    
+
     def record_round_taken_actions(self, g):
         g: graph.Graph = g
         a_list = [a.round_action for a in g.agents]
@@ -68,27 +62,16 @@ class SimMetrics:
         
         i = 1
         if all(a == "A" for a in a_list):
-            #print(f"Whole network took action 'A' in round {g.epoch}")
             self.n_rounds_all_took_A += 1
         elif all(a == "B" for a in a_list):
-            #print(f"Whole network took action 'B' in round {g.epoch}")
             self.n_rounds_all_took_B += 1
         elif a_list.count("A") >= len(a_list) - i:
-            #print(f"Supermajority took action 'A' in round {g.epoch}")
             self.n_rounds_supermajority_took_A += 1
         elif a_list.count("B") >= len(a_list) - i:
-            #print(f"Supermajority took action 'B' in round {g.epoch}")
             self.n_rounds_supermajority_took_B += 1
         else:
-            #print(f"Network took mixed actions in round {g.epoch}")
             self.n_rounds_mixed_actions += 1
 
-    # def update_final_round_when_action_changed(self, g):
-    #     g: graph.Graph = g
-    #     """ The last round that at least someone moved from action A to B
-    #     or vice versa. If this number is low, that means the network
-    #     got stuck early on one of the actions."""
-        
     def record_proportion_correct_action(self, g):
         g: graph.Graph = g
         n_agents = len(g.agents)
@@ -100,10 +83,7 @@ class SimMetrics:
                 )
             prop_list.append(round_n_correct / len(self.taken_actions[i]))
         self.sim_proportion_correct_action = np.average(prop_list)
-    
-    # def record_sim_average_expectation(self):
-    #     self.sim_average_expectation = np.average(self.average_expectations)
-    
+
     def record_sim_average_utility(self, g, trials):
         g: graph.Graph = g
         # Av utility per round per agent per trial

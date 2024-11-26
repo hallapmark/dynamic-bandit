@@ -74,7 +74,7 @@ class Agent:
             total_k += k
             total_n += n
         # add burn-in data
-        total_k += self._private_B_data.k
+        total_k += self._private_B_data.k # Note, for now this is added even for window updaters
         total_n += self._private_B_data.n
         if total_n > 0:
             self.expectation_B_update(total_k, total_n)
