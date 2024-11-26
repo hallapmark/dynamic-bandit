@@ -26,4 +26,4 @@ You can modify the parameters in `dynamic_bandit.py` to conduct experiments. By 
 
 `epsilon` > 0 enables the epsilon-greedy strategy
 
-`window_s` enables windowed updating (agents old data from rounds falling outside the window size).
+`window_s` enables windowed updating (agents discard old data from rounds that fall outside the window size).
